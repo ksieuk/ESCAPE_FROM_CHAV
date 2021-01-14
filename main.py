@@ -170,22 +170,39 @@ class Player(pygame.sprite.Sprite):
         self.pos_x, self.pos_y = tile_width * pos_x, tile_height * pos_y
         self.rect = self.image.get_rect().move(
             self.pos_x + 15, self.pos_y + 5)
+        self.is_moving_right = self.is_moving_left = self.is_moving_up = self.is_moving_down = False
 
-    def update(self, events):
+    def update(self, py_events):
         speed_x = speed_y = 0
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    pass
-        keystate = pygame.key.get_pressed()
 
-        if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
+        for py_event in py_events:
+            if py_event.type == pygame.KEYDOWN:
+                if py_event.key in (pygame.K_LEFT, pygame.K_a):
+                    self.is_moving_left = True
+                if py_event.key in (pygame.K_RIGHT, pygame.K_d):
+                    self.is_moving_right = True
+                if py_event.key in (pygame.K_UP, pygame.K_w):
+                    self.is_moving_up = True
+                if py_event.key in (pygame.K_DOWN, pygame.K_s):
+                    self.is_moving_down = True
+
+            if py_event.type == pygame.KEYUP:
+                if py_event.key in (pygame.K_LEFT, pygame.K_a):
+                    self.is_moving_left = False
+                if py_event.key in (pygame.K_RIGHT, pygame.K_d):
+                    self.is_moving_right = False
+                if py_event.key in (pygame.K_UP, pygame.K_w):
+                    self.is_moving_up = False
+                if py_event.key in (pygame.K_DOWN, pygame.K_s):
+                    self.is_moving_down = False
+
+        if self.is_moving_left:
             speed_x = -STEP
-        if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
+        if self.is_moving_right:
             speed_x = STEP
-        if keystate[pygame.K_UP] or keystate[pygame.K_w]:
+        if self.is_moving_up:
             speed_y = -STEP
-        if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
+        if self.is_moving_down:
             speed_y = STEP
 
         if WIDTH >= self.pos_x + speed_x >= 0:
@@ -195,6 +212,9 @@ class Player(pygame.sprite.Sprite):
         if HEIGHT >= self.pos_y + speed_y >= 0:
             self.pos_y += speed_y
             self.rect.y += speed_y
+
+        if not (self.is_moving_right or self.is_moving_left or self.is_moving_up or self.is_moving_down):
+            move_to_cell_center(player)
 
 
 class Camera:
@@ -224,7 +244,6 @@ start_screen()
 file_name = r"map.txt"
 player, level_x, level_y = generate_level(load_level(file_name))
 
-is_moving_right = is_moving_left = is_moving_up = is_moving_down = False
 
 running = True
 while running:
@@ -233,9 +252,6 @@ while running:
 
         if event.type == pygame.QUIT:
             running = False
-
-    if not (is_moving_right or is_moving_left or is_moving_up or is_moving_down):
-        move_to_cell_center(player)
 
     player.update(events)
     camera.update(player)  # TODO all spirites
