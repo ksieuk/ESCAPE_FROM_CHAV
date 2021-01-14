@@ -203,9 +203,6 @@ class Player(pygame.sprite.Sprite):
             self.pos_y += speed_y
             self.rect.y += speed_y
 
-        if not (self.is_moving_right or self.is_moving_left or self.is_moving_up or self.is_moving_down):
-            move_to_cell_center(player)
-
 
 class Camera:
     # зададим начальный сдвиг камеры
@@ -222,11 +219,6 @@ class Camera:
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
         self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
-
-
-def move_to_cell_center(player_sprite):
-    x, y = player_sprite.pos_x, player_sprite.pos_y
-    #print(x, y)
 
 
 camera = Camera()
