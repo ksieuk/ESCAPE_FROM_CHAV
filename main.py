@@ -175,26 +175,16 @@ class Player(pygame.sprite.Sprite):
     def update(self, py_events):
         speed_x = speed_y = 0
 
-        for py_event in py_events:
-            if py_event.type == pygame.KEYDOWN:
-                if py_event.key in (pygame.K_LEFT, pygame.K_a):
-                    self.is_moving_left = True
-                if py_event.key in (pygame.K_RIGHT, pygame.K_d):
-                    self.is_moving_right = True
-                if py_event.key in (pygame.K_UP, pygame.K_w):
-                    self.is_moving_up = True
-                if py_event.key in (pygame.K_DOWN, pygame.K_s):
-                    self.is_moving_down = True
+        keystate = pygame.key.get_pressed()
 
-            if py_event.type == pygame.KEYUP:
-                if py_event.key in (pygame.K_LEFT, pygame.K_a):
-                    self.is_moving_left = False
-                if py_event.key in (pygame.K_RIGHT, pygame.K_d):
-                    self.is_moving_right = False
-                if py_event.key in (pygame.K_UP, pygame.K_w):
-                    self.is_moving_up = False
-                if py_event.key in (pygame.K_DOWN, pygame.K_s):
-                    self.is_moving_down = False
+        if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
+            speed_x = -STEP
+        if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
+            speed_x = STEP
+        if keystate[pygame.K_UP] or keystate[pygame.K_w]:
+            speed_y = -STEP
+        if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
+            speed_y = STEP
 
         if self.is_moving_left:
             speed_x = -STEP
