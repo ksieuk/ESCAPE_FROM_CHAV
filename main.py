@@ -167,9 +167,9 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = player_image
+        self.pos_x, self.pos_y = tile_width * pos_x, tile_height * pos_y
         self.rect = self.image.get_rect().move(
-            tile_width * pos_x + 15, tile_height * pos_y + 5)
-        self.pos_x, self.pos_y = self.rect.x, self.rect.y
+            self.pos_x + 15, self.pos_y + 5)
 
     def update(self, events):
         speed_x = speed_y = 0
@@ -179,13 +179,13 @@ class Player(pygame.sprite.Sprite):
                     pass
         keystate = pygame.key.get_pressed()
 
-        if keystate[pygame.K_LEFT]:
+        if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
             speed_x = -STEP
-        if keystate[pygame.K_RIGHT]:
+        if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
             speed_x = STEP
-        if keystate[pygame.K_UP]:
+        if keystate[pygame.K_UP] or keystate[pygame.K_w]:
             speed_y = -STEP
-        if keystate[pygame.K_DOWN]:
+        if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
             speed_y = STEP
 
         if WIDTH >= self.pos_x + speed_x >= 0:
