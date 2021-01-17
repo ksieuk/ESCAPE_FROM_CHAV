@@ -19,6 +19,24 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 
+# словарь для карты
+map_symbols = {
+        '.': 'simple_road',
+        '-': 'asphalt_horizontal',
+        'I': 'asphalt_vertical',
+        '#': 'wall',
+        'O': 'ped',
+        '>': 'asphalt_turn_1',
+        '<': 'asphalt_turn_2',
+        '?': 'asphalt_turn_3',
+        ',': 'asphalt_turn_4',
+        '+': 'asphalt_junction',
+        'T': 'asphalt_triple_1',
+        'E': 'asphalt_triple_2',
+        'Y': 'asphalt_triple_3',
+        'L': 'asphalt_triple_4',
+    }
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -94,41 +112,19 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
+
+
 def generate_level(level):
     new_player, x, y = None, None, None
+
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Tile('simple_road', x, y)
-            elif level[y][x] == '-':
-                Tile('asphalt_horizontal', x, y)
-            elif level[y][x] == 'I':
-                Tile('asphalt_vertical', x, y)
-            elif level[y][x] == '#':
-                Tile('wall', x, y)
-            elif level[y][x] == 'O':
-                Tile('ped', x, y)
-            elif level[y][x] == '@':
+            if level[y][x] == '@':
                 Tile('empty', x, y)
                 new_player = Player(x, y)
-            elif level[y][x] == '>':
-                Tile('asphalt_turn_1', x, y)
-            elif level[y][x] == '<':
-                Tile('asphalt_turn_2', x, y)
-            elif level[y][x] == '?':
-                Tile('asphalt_turn_3', x, y)
-            elif level[y][x] == ',':
-                Tile('asphalt_turn_4', x, y)
-            elif level[y][x] == '+':
-                Tile('asphalt_junction', x, y)
-            elif level[y][x] == 'T':
-                Tile('asphalt_triple_1', x, y)
-            elif level[y][x] == 'E':
-                Tile('asphalt_triple_2', x, y)
-            elif level[y][x] == 'Y':
-                Tile('asphalt_triple_3', x, y)
-            elif level[y][x] == 'L':
-                Tile('asphalt_triple_4', x, y)
+            else:
+                Tile(map_symbols[level[y][x]], x, y)
+
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
