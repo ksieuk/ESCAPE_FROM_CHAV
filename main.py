@@ -3,7 +3,7 @@ import sys
 import pygame
 
 pygame.init()
-size = WIDTH, HEIGHT = 500, 500
+size = WIDTH, HEIGHT = 1000, 600
 screen = pygame.display.set_mode(size)
 screen.fill((0, 0, 255))
 clock = pygame.time.Clock()
@@ -20,7 +20,7 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 
 
-def load_image(name, colorkey=None):
+def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
 
     if not os.path.isfile(fullname):
@@ -33,11 +33,11 @@ def load_image(name, colorkey=None):
         print("Cannot load image ", name)
         raise SystemExit(message)
 
-    if colorkey is not None:
+    if color_key is not None:
         image = image.convert()
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
+        if color_key == -1:
+            color_key = image.get_at((0, 0))
+        image.set_colorkey(color_key)
     else:
         image = image.convert_alpha()
     return image
@@ -152,38 +152,36 @@ tile_images = {
 }
 player_image = load_image('mario.png')
 
-tile_width = tile_height = 50
+TILE_WIDTH = TILE_HEIGHT = 50
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
+    def __init__(self, tile_type: str, pos_x: int, pos_y: int):
         super().__init__(tiles_group, all_sprites)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
-            tile_width * pos_x, tile_height * pos_y)
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = player_image
-        self.pos_x, self.pos_y = tile_width * pos_x, tile_height * pos_y
         self.rect = self.image.get_rect().move(
-            self.pos_x + 15, self.pos_y + 5)
-        self.is_moving_right = self.is_moving_left = self.is_moving_up = self.is_moving_down = False
+            TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5)
 
     def update(self, py_events):
         speed_x = speed_y = 0
 
-        keystate = pygame.key.get_pressed()
+        key_state = pygame.key.get_pressed()
 
-        if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
+        if key_state[pygame.K_LEFT] or key_state[pygame.K_a]:
             speed_x = -STEP
-        if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
+        if key_state[pygame.K_RIGHT] or key_state[pygame.K_d]:
             speed_x = STEP
-        if keystate[pygame.K_UP] or keystate[pygame.K_w]:
+        if key_state[pygame.K_UP] or key_state[pygame.K_w]:
             speed_y = -STEP
-        if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
+        if key_state[pygame.K_DOWN] or key_state[pygame.K_s]:
             speed_y = STEP
 
         if self.is_moving_left:
@@ -195,13 +193,25 @@ class Player(pygame.sprite.Sprite):
         if self.is_moving_down:
             speed_y = STEP
 
-        if WIDTH >= self.pos_x + speed_x >= 0:
-            self.pos_x += speed_x
-            self.rect.x += speed_x
+        if not (self.check_wall(self.pos_x + speed_x, self.pos_y + speed_y) or
+                self.check_wall(self.pos_x + speed_x + self.player_size_x, self.pos_y + speed_y + self.player_size_y - 5)):
+            if self.pos_x + speed_x >= 0 and self.pos_x + speed_x + self.player_size_x <= (level_x + 1) * TILE_WIDTH:
+                self.pos_x += speed_x
+                self.rect.x += speed_x
+            if self.pos_y + speed_y >= 0 and self.pos_y + speed_y + self.player_size_y <= (level_y + 1) * TILE_HEIGHT:
+                self.pos_y += speed_y
+                self.rect.y += speed_y
+            else:
+                self.rect.left = block.rect.right
 
-        if HEIGHT >= self.pos_y + speed_y >= 0:
-            self.pos_y += speed_y
-            self.rect.y += speed_y
+        self.rect.y += speed_y
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_y > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
 
 
 class Camera:
@@ -226,7 +236,6 @@ start_screen()
 file_name = r"map.txt"
 player, level_x, level_y = generate_level(load_level(file_name))
 
-
 running = True
 while running:
     events = pygame.event.get()
@@ -236,12 +245,12 @@ while running:
             running = False
 
     player.update(events)
-    camera.update(player)  # TODO all spirites
+    camera.update(player)
     for sprite in all_sprites:
         camera.apply(sprite)
 
-    screen.fill(pygame.Color(0, 0, 0))
-    tiles_group.draw(screen)
+    screen.fill(pygame.Color(0, 0, 255))
+    all_sprites.draw(screen)
     player_group.draw(screen)
 
     pygame.display.flip()
