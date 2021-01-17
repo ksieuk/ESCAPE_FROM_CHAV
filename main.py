@@ -7,6 +7,7 @@ size = WIDTH, HEIGHT = 1000, 600
 screen = pygame.display.set_mode(size)
 screen.fill((0, 0, 255))
 clock = pygame.time.Clock()
+TILE_WIDTH = TILE_HEIGHT = 50
 
 FPS = 50
 STEP = 5
@@ -18,6 +19,7 @@ STEP = 5
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+walls_group = pygame.sprite.Group()
 
 
 def load_image(name, color_key=None):
@@ -105,7 +107,7 @@ def generate_level(level):
             elif level[y][x] == 'I':
                 Tile('asphalt_vertical', x, y)
             elif level[y][x] == '#':
-                Tile('wall', x, y)
+                Wall('wall', x, y)
             elif level[y][x] == 'O':
                 Tile('ped', x, y)
             elif level[y][x] == '@':
@@ -152,12 +154,18 @@ tile_images = {
 }
 player_image = load_image('mario.png')
 
-TILE_WIDTH = TILE_HEIGHT = 50
-
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type: str, pos_x: int, pos_y: int):
         super().__init__(tiles_group, all_sprites)
+        self.image = tile_images[tile_type]
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+
+
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, tile_type: str, pos_x: int, pos_y: int):
+        super().__init__(walls_group, all_sprites)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
@@ -184,23 +192,12 @@ class Player(pygame.sprite.Sprite):
         if key_state[pygame.K_DOWN] or key_state[pygame.K_s]:
             speed_y = STEP
 
-        if self.is_moving_left:
-            speed_x = -STEP
-        if self.is_moving_right:
-            speed_x = STEP
-        if self.is_moving_up:
-            speed_y = -STEP
-        if self.is_moving_down:
-            speed_y = STEP
+        self.rect.x += speed_x
 
-        if not (self.check_wall(self.pos_x + speed_x, self.pos_y + speed_y) or
-                self.check_wall(self.pos_x + speed_x + self.player_size_x, self.pos_y + speed_y + self.player_size_y - 5)):
-            if self.pos_x + speed_x >= 0 and self.pos_x + speed_x + self.player_size_x <= (level_x + 1) * TILE_WIDTH:
-                self.pos_x += speed_x
-                self.rect.x += speed_x
-            if self.pos_y + speed_y >= 0 and self.pos_y + speed_y + self.player_size_y <= (level_y + 1) * TILE_HEIGHT:
-                self.pos_y += speed_y
-                self.rect.y += speed_y
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_x > 0:
+                self.rect.right = block.rect.left
             else:
                 self.rect.left = block.rect.right
 
@@ -243,6 +240,7 @@ while running:
 
         if event.type == pygame.QUIT:
             running = False
+            terminate()
 
     player.update(events)
     camera.update(player)
