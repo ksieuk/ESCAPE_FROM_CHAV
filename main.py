@@ -45,6 +45,7 @@ map_symbols = {
         'S': 'roof_2',
         'D': 'roof_3',
         'F': 'roof_4',
+        'o': 'asphalt_luke',
     }
 
 
@@ -164,7 +165,8 @@ tile_images = {
     'roof_1': load_image('roof_1.png'),
     'roof_2': load_image('roof_2.png'),
     'roof_3': load_image('roof_3.png'),
-    'roof_4': load_image('roof_4.png')
+    'roof_4': load_image('roof_4.png'),
+    'asphalt_luke': load_image('asphalt_luke.png')
 }
 player_image = load_image('gopnik_first_tl.png')
 
