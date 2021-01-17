@@ -3,7 +3,7 @@ import sys
 import pygame
 
 pygame.init()
-size = WIDTH, HEIGHT = 500, 500
+size = WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode(size)
 screen.fill((0, 0, 255))
 clock = pygame.time.Clock()
@@ -29,6 +29,7 @@ map_symbols = {
         '2': 'roof_c2',
         '3': 'roof_c3',
         '4': 'roof_c4',
+        'b': 'roof_bottle',
         'O': 'ped',
         '>': 'asphalt_turn_1',
         '<': 'asphalt_turn_2',
