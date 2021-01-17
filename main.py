@@ -158,7 +158,7 @@ TILE_WIDTH = TILE_HEIGHT = 50
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type: str, pos_x: int, pos_y: int):
         super().__init__(tiles_group, all_sprites)
-        self.name = (tile_type, pos_x, pos_y)
+        self.name = tile_type
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
@@ -168,9 +168,10 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = player_image
-        self.pos_x, self.pos_y = TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y
+        self.player_size_x, self.player_size_y = self.image.get_size()
+        self.pos_x, self.pos_y = TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5
         self.rect = self.image.get_rect().move(
-            self.pos_x + 15, self.pos_y + 5)
+            self.pos_x, self.pos_y)
         self.is_moving_right = self.is_moving_left = self.is_moving_up = self.is_moving_down = False
         self.x_, self.y_ = None, None
 
@@ -197,23 +198,27 @@ class Player(pygame.sprite.Sprite):
         if self.is_moving_down:
             speed_y = STEP
 
-        if level_x * TILE_WIDTH >= self.pos_x + speed_x >= 0:
-            self.pos_x += speed_x
-            self.rect.x += speed_x
+        if not (self.check_wall(self.pos_x + speed_x, self.pos_y + speed_y) or
+                self.check_wall(self.pos_x + speed_x + self.player_size_x, self.pos_y + speed_y + self.player_size_y - 5)):
+            if self.pos_x + speed_x >= 0 and self.pos_x + speed_x + self.player_size_x <= (level_x + 1) * TILE_WIDTH:
+                self.pos_x += speed_x
+                self.rect.x += speed_x
+            if self.pos_y + speed_y >= 0 and self.pos_y + speed_y + self.player_size_y <= (level_y + 1) * TILE_HEIGHT:
+                self.pos_y += speed_y
+                self.rect.y += speed_y
+            else:
+                print(self.pos_y + speed_y + self.player_size_y, level_x, level_y)
 
-        if level_y * TILE_HEIGHT >= self.pos_y + speed_y >= 0:
-            self.pos_y += speed_y
-            self.rect.y += speed_y
-
-        self.check_tile()
-
-    def check_tile(self):
-        x, y = self.pos_x // TILE_WIDTH, self.pos_y // TILE_HEIGHT
-        tile = list(tiles_group)[y + x * level_y]
-        if self.x_ != x or y != self.y_:
-            # print(tile.name, y + x * level_y, '-', y, x)
-            self.x_ = x
-            self.y_ = y
+    def check_wall(self, pos_now_x, pos_now_y):
+        x, y = pos_now_x // TILE_WIDTH, pos_now_y // TILE_HEIGHT
+        tile = list(tiles_group)[y * (level_x + 1) + x]
+        if tile.name == "wall":
+            return True
+        return False
+        # if self.x_ != x or y != self.y_:
+        #     print(tile.name, y * level_x + x, '-', x, y)
+        #     self.x_ = x
+        #     self.y_ = y
 
 
 class Camera:
@@ -251,7 +256,7 @@ while running:
     for sprite in all_sprites:
         camera.apply(sprite)
 
-    screen.fill(pygame.Color(0, 0, 0))
+    screen.fill(pygame.Color(0, 0, 255))
     tiles_group.draw(screen)
     player_group.draw(screen)
 
