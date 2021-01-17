@@ -158,7 +158,6 @@ TILE_WIDTH = TILE_HEIGHT = 50
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type: str, pos_x: int, pos_y: int):
         super().__init__(tiles_group, all_sprites)
-        self.name = tile_type
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
@@ -168,12 +167,9 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = player_image
-        self.player_size_x, self.player_size_y = self.image.get_size()
-        self.pos_x, self.pos_y = TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5
+        pos_x, pos_y = TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5
         self.rect = self.image.get_rect().move(
-            self.pos_x, self.pos_y)
-        self.is_moving_right = self.is_moving_left = self.is_moving_up = self.is_moving_down = False
-        self.x_, self.y_ = None, None
+            pos_x, pos_y)
 
     def update(self, py_events):
         speed_x = speed_y = 0
@@ -207,18 +203,16 @@ class Player(pygame.sprite.Sprite):
                 self.pos_y += speed_y
                 self.rect.y += speed_y
             else:
-                print(self.pos_y + speed_y + self.player_size_y, level_x, level_y)
+                self.rect.left = block.rect.right
 
-    def check_wall(self, pos_now_x, pos_now_y):
-        x, y = pos_now_x // TILE_WIDTH, pos_now_y // TILE_HEIGHT
-        tile = list(tiles_group)[y * (level_x + 1) + x]
-        if tile.name == "wall":
-            return True
-        return False
-        # if self.x_ != x or y != self.y_:
-        #     print(tile.name, y * level_x + x, '-', x, y)
-        #     self.x_ = x
-        #     self.y_ = y
+        self.rect.y += speed_y
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_y > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
 
 
 class Camera:
@@ -257,7 +251,7 @@ while running:
         camera.apply(sprite)
 
     screen.fill(pygame.Color(0, 0, 255))
-    tiles_group.draw(screen)
+    all_sprites.draw(screen)
     player_group.draw(screen)
 
     pygame.display.flip()
