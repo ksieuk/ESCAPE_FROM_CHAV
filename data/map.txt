@@ -1,11 +1,11 @@
-###O.I.O#####GGO.I.
-###O.I.O#####GGO.I.
-###O.I.O#####GGO.I.
+##FO.I.OS###FGGO.I.
+##FO.I.OS###FGGO.I.
+AA4O.I.O1AAA4GGO.I.
 OOOO.I.OOOOOOOOO.I.
 .....I...........I.
 -----@-----------Y-
 .....I.............
 OOOO.I.OOOOOOOOOOOO
-###O.I.O##########O
-###O.I.O##########O
-###O.I.O##########O
+DD3O.I.O2DDDDDDDD3O
+##FO.I.OS####b###FO
+##FO.I.OS########FO
