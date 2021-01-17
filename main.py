@@ -41,6 +41,10 @@ map_symbols = {
         'Y': 'asphalt_triple_3',
         'L': 'asphalt_triple_4',
         'G': 'grass',
+        'A': 'roof_1',
+        'S': 'roof_2',
+        'D': 'roof_3',
+        'F': 'roof_4',
     }
 
 
@@ -156,7 +160,11 @@ tile_images = {
     'asphalt_vertical': load_image('asphalt_vertical.png'),
     'asphalt_horizontal': load_image('asphalt_horizontal.png'),
     'grass': load_image('grass.png'),
-    'roof_bottle': load_image('roof_bottle.png')
+    'roof_bottle': load_image('roof_bottle.png'),
+    'roof_1': load_image('roof_1.png'),
+    'roof_2': load_image('roof_2.png'),
+    'roof_3': load_image('roof_3.png'),
+    'roof_4': load_image('roof_4.png')
 }
 player_image = load_image('gopnik_first_tl.png')
 
