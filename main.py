@@ -146,7 +146,7 @@ tile_images = {
     'asphalt_vertical': load_image('asphalt_vertical.png'),
     'asphalt_horizontal': load_image('asphalt_horizontal.png')
 }
-player_image = load_image('mario.png')
+player_image = load_image('gopnik_first_tl.png')
 
 tile_width = tile_height = 50
 
