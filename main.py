@@ -167,9 +167,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = player_image
-        pos_x, pos_y = TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5
         self.rect = self.image.get_rect().move(
-            pos_x, pos_y)
+            TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5)
 
     def update(self, py_events):
         speed_x = speed_y = 0
