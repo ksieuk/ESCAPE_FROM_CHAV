@@ -298,7 +298,6 @@ while running:
             running = False
             terminate()
         if event.type == SONG_END:
-            print('lol')
             load_music(random.choice(background_music), 'song')
             pygame.mixer.music.play(0)
 
