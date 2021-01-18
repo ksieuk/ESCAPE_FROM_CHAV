@@ -23,6 +23,7 @@ walls_group = pygame.sprite.Group()
 
 # словарь для карты
 map_symbols = {
+        '@': 'spawn',
         '.': 'simple_road',
         '-': 'asphalt_horizontal',
         'I': 'asphalt_vertical',
@@ -130,11 +131,14 @@ def generate_level(level):
 
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] == '@':
-                Tile('empty', x, y)
+            tile_name = map_symbols[level[y][x]]
+            if tile_name == 'spawn':
+                Tile(tile_name, x, y)
                 new_player = Player(x, y)
+            elif tile_name.startswith('roof'):
+                Wall(tile_name, x, y)
             else:
-                Tile(map_symbols[level[y][x]], x, y)
+                Tile(tile_name, x, y)
 
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
@@ -156,7 +160,7 @@ tile_images = {
     'roof_c2': load_image('roof_corner_2.png'),
     'roof_c3': load_image('roof_corner_3.png'),
     'roof_c4': load_image('roof_corner_4.png'),
-    'empty': load_image('center.png'),
+    'spawn': load_image('center.png'),
     'simple_road': load_image('asphalt_black.png'),
     'asphalt_vertical': load_image('asphalt_vertical.png'),
     'asphalt_horizontal': load_image('asphalt_horizontal.png'),
@@ -214,6 +218,7 @@ class Player(pygame.sprite.Sprite):
         for block in walls_list:
             if speed_x > 0:
                 self.rect.right = block.rect.left
+            else:
                 self.rect.left = block.rect.right
 
         self.rect.y += speed_y
