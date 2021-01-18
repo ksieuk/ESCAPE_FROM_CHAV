@@ -125,8 +125,6 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-
-
 def generate_level(level):
     new_player, x, y = None, None, None
 
@@ -196,7 +194,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5)
 
-    def update(self, py_events):
+    def update(self):
         speed_x = speed_y = 0
 
         key_state = pygame.key.get_pressed()
@@ -215,7 +213,7 @@ class Player(pygame.sprite.Sprite):
         walls_list = pygame.sprite.spritecollide(self, walls_group, False)
         for block in walls_list:
             if speed_x > 0:
-                self.rect.right = block.rect.le:
+                self.rect.right = block.rect.left
                 self.rect.left = block.rect.right
 
         self.rect.y += speed_y
@@ -259,7 +257,7 @@ while running:
             running = False
             terminate()
 
-    player.update(events)
+    player.update()
     camera.update(player)
     for sprite in all_sprites:
         camera.apply(sprite)
