@@ -37,12 +37,6 @@ def load_music(name, type=None):
 
     return sound
 
-
-SONG_END = pygame.USEREVENT
-pygame.mixer.music.set_endevent(SONG_END)
-load_music('test.mp3', 'song')
-pygame.mixer.music.play()
-
 FPS = 50
 STEP = 5
 
@@ -288,6 +282,10 @@ class Camera:
 
 camera = Camera()
 start_screen()
+SONG_END = pygame.USEREVENT + 1
+pygame.mixer.music.set_endevent(SONG_END)
+load_music('test.mp3', 'song')
+pygame.mixer.music.play(0)
 file_name = r"map.txt"
 player, level_x, level_y = generate_level(load_level(file_name))
 
@@ -300,8 +298,9 @@ while running:
             running = False
             terminate()
         if event.type == SONG_END:
+            print('lol')
             load_music(random.choice(background_music), 'song')
-            pygame.mixer.music.play()
+            pygame.mixer.music.play(0)
 
     player.update()
     camera.update(player)
