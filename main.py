@@ -23,33 +23,33 @@ walls_group = pygame.sprite.Group()
 
 # словарь для карты
 map_symbols = {
-        '@': 'spawn',
-        '.': 'simple_road',
-        '-': 'asphalt_horizontal',
-        'I': 'asphalt_vertical',
-        '#': 'roof',
-        '1': 'roof_c1',
-        '2': 'roof_c2',
-        '3': 'roof_c3',
-        '4': 'roof_c4',
-        'b': 'roof_bottle',
-        'O': 'ped',
-        '>': 'asphalt_turn_1',
-        '<': 'asphalt_turn_2',
-        '?': 'asphalt_turn_3',
-        ',': 'asphalt_turn_4',
-        '+': 'asphalt_junction',
-        'T': 'asphalt_triple_1',
-        'E': 'asphalt_triple_2',
-        'Y': 'asphalt_triple_3',
-        'L': 'asphalt_triple_4',
-        'G': 'grass',
-        'A': 'roof_1',
-        'S': 'roof_2',
-        'D': 'roof_3',
-        'F': 'roof_4',
-        'o': 'asphalt_luke',
-    }
+    '@': 'spawn',
+    '.': 'simple_road',
+    '-': 'asphalt_horizontal',
+    'I': 'asphalt_vertical',
+    '#': 'roof',
+    '1': 'roof_c1',
+    '2': 'roof_c2',
+    '3': 'roof_c3',
+    '4': 'roof_c4',
+    'b': 'roof_bottle',
+    'O': 'ped',
+    '>': 'asphalt_turn_1',
+    '<': 'asphalt_turn_2',
+    '?': 'asphalt_turn_3',
+    ',': 'asphalt_turn_4',
+    '+': 'asphalt_junction',
+    'T': 'asphalt_triple_1',
+    'E': 'asphalt_triple_2',
+    'Y': 'asphalt_triple_3',
+    'L': 'asphalt_triple_4',
+    'G': 'grass',
+    'A': 'roof_1',
+    'S': 'roof_2',
+    'D': 'roof_3',
+    'F': 'roof_4',
+    'o': 'asphalt_luke',
+}
 
 
 def load_image(name, color_key=None):
@@ -194,7 +194,9 @@ class Wall(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
-        self.image = player_image
+        self.image_left = player_image
+        self.image_right = pygame.transform.flip(player_image, True, False)
+        self.image = self.image_left
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5)
 
@@ -205,8 +207,10 @@ class Player(pygame.sprite.Sprite):
 
         if key_state[pygame.K_LEFT] or key_state[pygame.K_a]:
             speed_x = -STEP
+            self.image = self.image_left
         if key_state[pygame.K_RIGHT] or key_state[pygame.K_d]:
             speed_x = STEP
+            self.image = self.image_right
         if key_state[pygame.K_UP] or key_state[pygame.K_w]:
             speed_y = -STEP
         if key_state[pygame.K_DOWN] or key_state[pygame.K_s]:
