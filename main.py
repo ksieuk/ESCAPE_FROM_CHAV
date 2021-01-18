@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame
+import random
 
 pygame.init()
 size = WIDTH, HEIGHT = 800, 600
@@ -8,6 +9,39 @@ screen = pygame.display.set_mode(size)
 screen.fill((0, 0, 255))
 clock = pygame.time.Clock()
 TILE_WIDTH = TILE_HEIGHT = 50
+background_music = ['colonel_bg.mp3', 'blood_bg.mp3', 'dont_bg.mp3', 'osen_bg.mp3', 'zarya_bg.mp3']
+
+
+def load_music(name, type=None):
+    fullname = os.path.join('data', name)
+
+    if not os.path.isfile(fullname):
+        print(f"Файл со звуком '{fullname}' не найден")
+        sys.exit()
+
+    sound = None
+
+    try:
+        if type == 'song':
+            pygame.mixer.music.load(fullname)
+            pygame.mixer.music.set_volume(0.5)
+
+        elif type == 'sound':
+            sound = pygame.mixer.Sound(fullname)
+        else:
+            print('Unexpected type')
+            return
+    except pygame.error as message:
+        print("Cannot load sound ", name)
+        raise SystemExit(message)
+
+    return sound
+
+
+SONG_END = pygame.USEREVENT
+pygame.mixer.music.set_endevent(SONG_END)
+load_music('test.mp3', 'song')
+pygame.mixer.music.play()
 
 FPS = 50
 STEP = 5
@@ -265,6 +299,9 @@ while running:
         if event.type == pygame.QUIT:
             running = False
             terminate()
+        if event.type == SONG_END:
+            load_music(random.choice(background_music), 'song')
+            pygame.mixer.music.play()
 
     player.update()
     camera.update(player)
