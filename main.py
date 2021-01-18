@@ -172,7 +172,7 @@ tile_images = {
     'roof_4': load_image('roof_4.png'),
     'asphalt_luke': load_image('asphalt_luke.png')
 }
-player_image = load_image('gopnik_first_tl.png')
+player_image = load_image('gopnik_first.png')
 
 
 class Tile(pygame.sprite.Sprite):
