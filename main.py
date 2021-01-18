@@ -3,7 +3,7 @@ import sys
 import pygame
 
 pygame.init()
-size = WIDTH, HEIGHT = 1000, 600
+size = WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode(size)
 screen.fill((0, 0, 255))
 clock = pygame.time.Clock()
@@ -20,6 +20,35 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 walls_group = pygame.sprite.Group()
+
+# словарь для карты
+map_symbols = {
+        '.': 'simple_road',
+        '-': 'asphalt_horizontal',
+        'I': 'asphalt_vertical',
+        '#': 'roof',
+        '1': 'roof_c1',
+        '2': 'roof_c2',
+        '3': 'roof_c3',
+        '4': 'roof_c4',
+        'b': 'roof_bottle',
+        'O': 'ped',
+        '>': 'asphalt_turn_1',
+        '<': 'asphalt_turn_2',
+        '?': 'asphalt_turn_3',
+        ',': 'asphalt_turn_4',
+        '+': 'asphalt_junction',
+        'T': 'asphalt_triple_1',
+        'E': 'asphalt_triple_2',
+        'Y': 'asphalt_triple_3',
+        'L': 'asphalt_triple_4',
+        'G': 'grass',
+        'A': 'roof_1',
+        'S': 'roof_2',
+        'D': 'roof_3',
+        'F': 'roof_4',
+        'o': 'asphalt_luke',
+    }
 
 
 def load_image(name, color_key=None):
@@ -96,41 +125,19 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
+
+
 def generate_level(level):
     new_player, x, y = None, None, None
+
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Tile('simple_road', x, y)
-            elif level[y][x] == '-':
-                Tile('asphalt_horizontal', x, y)
-            elif level[y][x] == 'I':
-                Tile('asphalt_vertical', x, y)
-            elif level[y][x] == '#':
-                Wall('wall', x, y)
-            elif level[y][x] == 'O':
-                Tile('ped', x, y)
-            elif level[y][x] == '@':
+            if level[y][x] == '@':
                 Tile('empty', x, y)
                 new_player = Player(x, y)
-            elif level[y][x] == '>':
-                Tile('asphalt_turn_1', x, y)
-            elif level[y][x] == '<':
-                Tile('asphalt_turn_2', x, y)
-            elif level[y][x] == '?':
-                Tile('asphalt_turn_3', x, y)
-            elif level[y][x] == ',':
-                Tile('asphalt_turn_4', x, y)
-            elif level[y][x] == '+':
-                Tile('asphalt_junction', x, y)
-            elif level[y][x] == 'T':
-                Tile('asphalt_triple_1', x, y)
-            elif level[y][x] == 'E':
-                Tile('asphalt_triple_2', x, y)
-            elif level[y][x] == 'Y':
-                Tile('asphalt_triple_3', x, y)
-            elif level[y][x] == 'L':
-                Tile('asphalt_triple_4', x, y)
+            else:
+                Tile(map_symbols[level[y][x]], x, y)
+
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
@@ -146,13 +153,24 @@ tile_images = {
     'asphalt_triple_4': load_image('asphalt_triple_4.png'),
     'asphalt_junction': load_image('asphalt_junction.png'),
     'ped': load_image('ped_road.png'),
-    'wall': load_image('wall.png'),
+    'roof': load_image('roof.png'),
+    'roof_c1': load_image('roof_corner_1.png'),
+    'roof_c2': load_image('roof_corner_2.png'),
+    'roof_c3': load_image('roof_corner_3.png'),
+    'roof_c4': load_image('roof_corner_4.png'),
     'empty': load_image('center.png'),
     'simple_road': load_image('asphalt_black.png'),
     'asphalt_vertical': load_image('asphalt_vertical.png'),
-    'asphalt_horizontal': load_image('asphalt_horizontal.png')
+    'asphalt_horizontal': load_image('asphalt_horizontal.png'),
+    'grass': load_image('grass.png'),
+    'roof_bottle': load_image('roof_bottle.png'),
+    'roof_1': load_image('roof_1.png'),
+    'roof_2': load_image('roof_2.png'),
+    'roof_3': load_image('roof_3.png'),
+    'roof_4': load_image('roof_4.png'),
+    'asphalt_luke': load_image('asphalt_luke.png')
 }
-player_image = load_image('mario.png')
+player_image = load_image('gopnik_first_tl.png')
 
 
 class Tile(pygame.sprite.Sprite):
@@ -197,8 +215,7 @@ class Player(pygame.sprite.Sprite):
         walls_list = pygame.sprite.spritecollide(self, walls_group, False)
         for block in walls_list:
             if speed_x > 0:
-                self.rect.right = block.rect.left
-            else:
+                self.rect.right = block.rect.le:
                 self.rect.left = block.rect.right
 
         self.rect.y += speed_y
