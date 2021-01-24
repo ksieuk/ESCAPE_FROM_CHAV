@@ -50,6 +50,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 walls_group = pygame.sprite.Group()
+enemies_group = pygame.sprite.Group()
 
 
 def load_image(name, color_key=None):
@@ -128,6 +129,7 @@ def load_level(name):
 
 def generate_level(level):
     new_player, x, y = None, None, None
+    new_enemies = []
 
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -135,18 +137,21 @@ def generate_level(level):
             if tile_name == 'spawn':
                 Tile(tile_name, x, y)
                 new_player = Player(x, y)
+            elif tile_name == 'enemy':
+                new_enemies.append(Enemy(x, y))
             elif tile_name.startswith('roof'):
                 Wall(tile_name, x, y)
             else:
                 Tile(tile_name, x, y)
 
     # вернем игрока, а также размер поля в клетках
-    return new_player, x, y
+    return new_player, new_enemies, x, y
 
 
 # словарь для карты
 map_symbols = {
     '@': 'spawn',
+    '$': 'enemy',
     '.': 'simple_road',
     '-': 'asphalt_horizontal',
     'I': 'asphalt_vertical',
@@ -203,6 +208,7 @@ tile_images = {
     'asphalt_luke': load_image('asphalt_luke.png')
 }
 player_image = load_image('gopnik_first.png')
+enemy_image = load_image('mario.png')
 
 
 class Tile(pygame.sprite.Sprite):
@@ -225,7 +231,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image_left = player_image
-        self.image_right = pygame.transform.flip(player_image, True, False)
+        self.image_right = pygame.transform.flip(self.image_left, True, False)
         self.image = self.image_left
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5)
@@ -265,6 +271,57 @@ class Player(pygame.sprite.Sprite):
                 self.rect.top = block.rect.bottom
 
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(enemies_group, all_sprites)
+        self.image_left = enemy_image
+        self.image_right = pygame.transform.flip(self.image_left, True, False)
+        self.image = self.image_left
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5 - 50)
+        self.state = "peaceful"
+        self.direction = "left"
+        self.directions = {"up": "down",
+                           "down": "up",
+                           "left": "right",
+                           "right": "left"}
+
+    def peaceful_walking(self):
+        speed_x = speed_y = 0
+        if self.direction == "right":
+            speed_x += STEP
+            self.image = self.image_right
+        if self.direction == "left":
+            speed_x -= STEP
+            self.image = self.image_left
+        if self.direction == "up":
+            speed_y += STEP
+        if self.direction == "down":
+            speed_y -= STEP
+
+        walls = pygame.sprite.spritecollide(self, walls_group, False, collided=pygame.sprite.collide_rect_ratio(1))
+        free_tiles = pygame.sprite.spritecollide(self, tiles_group, False)
+        if walls:
+            self.direction = self.directions[self.direction]
+            speed_y = -speed_y
+            speed_x = -speed_x
+        if free_tiles[0]:
+            pass
+
+        self.rect.x += speed_x
+        self.rect.y += speed_y
+
+    def update(self, *args, **kwargs) -> None:
+        if self.state == "peaceful":
+            self.peaceful_walking()
+        elif self.state == "dashing":
+            pass
+        elif self.state == "murderous":
+            pass
+        elif self.state == "murderous":
+            pass
+
+
 class Camera:
     # зададим начальный сдвиг камеры
     def __init__(self):
@@ -292,7 +349,7 @@ load_music(random.choice(background_music), 'song')
 pygame.mixer.music.play(0)
 file_name = r"map.txt"
 
-player, level_x, level_y = generate_level(load_level(file_name))
+player, enemies, level_x, level_y = generate_level(load_level(file_name))
 
 running = True
 while running:
@@ -310,10 +367,13 @@ while running:
     camera.update(player)
     for sprite in all_sprites:
         camera.apply(sprite)
+    for enemy in enemies:
+        enemy.update()
 
     screen.fill(pygame.Color(0, 0, 255))
     all_sprites.draw(screen)
     player_group.draw(screen)
+    enemies_group.draw(screen)
 
     pygame.display.flip()
     clock.tick(FPS)
