@@ -21,36 +21,6 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 walls_group = pygame.sprite.Group()
 
-# словарь для карты
-map_symbols = {
-    '@': 'spawn',
-    '.': 'simple_road',
-    '-': 'asphalt_horizontal',
-    'I': 'asphalt_vertical',
-    '#': 'roof',
-    '1': 'roof_c1',
-    '2': 'roof_c2',
-    '3': 'roof_c3',
-    '4': 'roof_c4',
-    'b': 'roof_bottle',
-    'O': 'ped',
-    '>': 'asphalt_turn_1',
-    '<': 'asphalt_turn_2',
-    '?': 'asphalt_turn_3',
-    ',': 'asphalt_turn_4',
-    '+': 'asphalt_junction',
-    'T': 'asphalt_triple_1',
-    'E': 'asphalt_triple_2',
-    'Y': 'asphalt_triple_3',
-    'L': 'asphalt_triple_4',
-    'G': 'grass',
-    'A': 'roof_1',
-    'S': 'roof_2',
-    'D': 'roof_3',
-    'F': 'roof_4',
-    'o': 'asphalt_luke',
-}
-
 
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
@@ -144,6 +114,36 @@ def generate_level(level):
     return new_player, x, y
 
 
+# словарь для карты
+map_symbols = {
+    '@': 'spawn',
+    '.': 'simple_road',
+    '-': 'asphalt_horizontal',
+    'I': 'asphalt_vertical',
+    '#': 'roof',
+    '1': 'roof_tilt_45',
+    '2': 'roof_tilt_45_revert',
+    '3': 'roof_building_vertical',
+    '4': 'roof_c4',
+    'b': 'roof_bottle',
+    'O': 'ped',
+    '>': 'asphalt_turn_1',
+    '<': 'asphalt_turn_2',
+    '?': 'asphalt_turn_3',
+    ',': 'asphalt_turn_4',
+    '+': 'asphalt_junction',
+    'T': 'asphalt_triple_1',
+    'E': 'asphalt_triple_2',
+    'Y': 'asphalt_triple_3',
+    'L': 'asphalt_triple_4',
+    'G': 'grass',
+    'A': 'roof_1',
+    'S': 'roof_2',
+    'D': 'roof_3',
+    'F': 'roof_4',
+    'o': 'asphalt_luke',
+}
+
 tile_images = {
     'asphalt_triple_1': load_image('asphalt_triple_1.png'),
     'asphalt_turn_1': load_image('asphalt_turn_1.png'),
@@ -155,10 +155,10 @@ tile_images = {
     'asphalt_triple_4': load_image('asphalt_triple_4.png'),
     'asphalt_junction': load_image('asphalt_junction.png'),
     'ped': load_image('ped_road.png'),
-    'roof': load_image('roof.png'),
-    'roof_c1': load_image('roof_corner_1.png'),
-    'roof_c2': load_image('roof_corner_2.png'),
-    'roof_c3': load_image('roof_corner_3.png'),
+    'roof': load_image('roof.png'),  # TEST
+    'roof_tilt_45': load_image('roof_front.png'),
+    'roof_tilt_45_revert': load_image('roof_back.png'),
+    'roof_building_vertical': load_image('roof_building.png'),
     'roof_c4': load_image('roof_corner_4.png'),
     'spawn': load_image('center.png'),
     'simple_road': load_image('asphalt_black.png'),
