@@ -217,6 +217,7 @@ class Tile(pygame.sprite.Sprite):
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+        self.name = tile_type
 
 
 class Wall(pygame.sprite.Sprite):
@@ -285,6 +286,7 @@ class Enemy(pygame.sprite.Sprite):
                            "down": "up",
                            "left": "right",
                            "right": "left"}
+        self.tile_previous = None
 
     def peaceful_walking(self):
         speed_x = speed_y = 0
@@ -303,13 +305,19 @@ class Enemy(pygame.sprite.Sprite):
         free_tiles = pygame.sprite.spritecollide(self, tiles_group, False)
         if walls:
             self.direction = self.directions[self.direction]
-            speed_y = -speed_y
             speed_x = -speed_x
-        if free_tiles[0]:
-            pass
+            speed_y = -speed_y
+
+        tiles_names = map(lambda x: x.name, free_tiles)
+        if "asphalt_junction" in tiles_names and self.tile_previous != free_tiles[0]:
+            possible_directions = list(self.directions.values())
+            print(possible_directions, self.directions.values())
+            possible_directions.remove(self.direction)
+            self.direction = random.choice(possible_directions)
 
         self.rect.x += speed_x
         self.rect.y += speed_y
+        self.tile_previous = free_tiles[0]
 
     def update(self, *args, **kwargs) -> None:
         if self.state == "peaceful":
