@@ -282,11 +282,14 @@ class Camera:
 
 camera = Camera()
 start_screen()
+
+# playing background music
 SONG_END = pygame.USEREVENT + 1
 pygame.mixer.music.set_endevent(SONG_END)
-load_music('test.mp3', 'song')
+load_music(random.choice(background_music), 'song')
 pygame.mixer.music.play(0)
 file_name = r"map.txt"
+
 player, level_x, level_y = generate_level(load_level(file_name))
 
 running = True
