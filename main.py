@@ -9,11 +9,12 @@ screen = pygame.display.set_mode(size)
 screen.fill((0, 0, 255))
 clock = pygame.time.Clock()
 TILE_WIDTH = TILE_HEIGHT = 50
+VOLUME = 0.1
 background_music = ['colonel_bg.mp3', 'blood_bg.mp3', 'dont_bg.mp3', 'osen_bg.mp3', 'zarya_bg.mp3']
 
 
 def load_music(name, type=None):
-    fullname = os.path.join('data', name)
+    fullname = os.path.join(r"data/music", name)
 
     if not os.path.isfile(fullname):
         print(f"Файл со звуком '{fullname}' не найден")
@@ -24,7 +25,7 @@ def load_music(name, type=None):
     try:
         if type == 'song':
             pygame.mixer.music.load(fullname)
-            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.set_volume(VOLUME)
 
         elif type == 'sound':
             sound = pygame.mixer.Sound(fullname)
@@ -36,6 +37,7 @@ def load_music(name, type=None):
         raise SystemExit(message)
 
     return sound
+
 
 FPS = 50
 STEP = 5
@@ -51,7 +53,7 @@ walls_group = pygame.sprite.Group()
 
 
 def load_image(name, color_key=None):
-    fullname = os.path.join('data', name)
+    fullname = os.path.join(r'data/textures/', name)
 
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -108,8 +110,8 @@ def start_screen():
         clock.tick(FPS)
 
 
-def load_level(filename):
-    filename = "data/" + filename
+def load_level(name):
+    filename = os.path.join(r'data/levels/', name)
     if not os.path.isfile(filename):
         print(f"Файл с уровнем '{filename}' не найден")
         sys.exit()
