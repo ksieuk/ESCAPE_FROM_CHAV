@@ -292,8 +292,31 @@ class Enemy(pygame.sprite.Sprite):
         self.possible_directions = list(self.directions.values())
         self.possible_directions.remove(self.direction)
 
-    def dashing(self):
-        pass
+    def update(self, *args, **kwargs) -> None:
+        if self.state == "peaceful":
+            self.peaceful_walking()
+        elif self.state == "dashing":
+            self.dashing()
+        elif self.state == "murderous":
+            self.murderous_run()
+
+        distance = self.check_distance()
+        if distance < 100:
+            if self.state != "murderous":
+                self.state = "murderous"
+                print(1)
+        elif distance < 400:
+            if self.state != "dashing":
+                self.state = "dashing"
+                print(2)
+        elif self.state != "peaceful":
+            self.state = "peaceful"
+            print(3)
+
+    def check_distance(self):
+        enemy_x, enemy_y = self.rect.x, self.rect.y
+        player_x, player_y = player.rect.x, player.rect.y
+        return int(math.hypot(enemy_x - player_x, enemy_y - player_y))
 
     def peaceful_walking(self):
         speed_x = speed_y = 0
@@ -322,6 +345,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += speed_x
         self.rect.y += speed_y
         self.tile_previous = tile_name
+
+    def dashing(self):
+        pass
 
     def murderous_run(self):
         pass
@@ -373,32 +399,6 @@ class Enemy(pygame.sprite.Sprite):
 
         self.possible_directions = list(self.directions.values())
         self.possible_directions.remove(self.directions[self.direction])
-
-    def update(self, *args, **kwargs) -> None:
-        if self.state == "peaceful":
-            self.peaceful_walking()
-        elif self.state == "dashing":
-            self.dashing()
-        elif self.state == "murderous":
-            self.murderous_run()
-
-        distance = self.check_distance()
-        if distance < 100:
-            if self.state != "murderous":
-                self.state = "murderous"
-                print(1)
-        elif distance < 400:
-            if self.state != "dashing":
-                self.state = "dashing"
-                print(2)
-        elif self.state != "peaceful":
-            self.state = "peaceful"
-            print(3)
-
-    def check_distance(self):
-        enemy_x, enemy_y = self.rect.x, self.rect.y
-        player_x, player_y = player.rect.x, player.rect.y
-        return int(math.hypot(enemy_x - player_x, enemy_y - player_y))
 
 
 class Camera:
