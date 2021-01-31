@@ -312,56 +312,59 @@ class Enemy(pygame.sprite.Sprite):
 
         tile_name = free_tiles[0].name
         if self.tile_previous != tile_name:
-
-            if 'asphalt_junction' == tile_name:
-                self.direction = random.choice(self.possible_directions)
-
-            elif 'asphalt_triple_1' == tile_name:
-                possible_directions = self.possible_directions[:]
-                possible_directions.remove("up")
-                self.direction = random.choice(possible_directions)
-
-            elif 'asphalt_triple_2' == tile_name:
-                possible_directions = self.possible_directions[:]
-                possible_directions.remove("right")
-                self.direction = random.choice(possible_directions)
-
-            elif 'asphalt_triple_3' == tile_name:
-                possible_directions = self.possible_directions[:]
-                possible_directions.remove("down")
-                self.direction = random.choice(possible_directions)
-
-            elif 'asphalt_triple_4' == tile_name:
-                possible_directions = self.possible_directions[:]
-                possible_directions.remove("left")
-                self.direction = random.choice(possible_directions)
-
-            elif 'asphalt_turn_1' == tile_name:
-                possible_directions = ["down", "right"]
-                possible_directions.remove(self.direction)
-                self.direction = random.choice(possible_directions)
-
-            elif 'asphalt_turn_2' == tile_name:
-                possible_directions = ["down", "left"]
-                possible_directions.remove(self.direction)
-                self.direction = random.choice(possible_directions)
-
-            elif 'asphalt_turn_3' == tile_name:
-                possible_directions = ["up", "left"]
-                possible_directions.remove(self.direction)
-                self.direction = random.choice(possible_directions)
-
-            elif 'asphalt_turn_4' == tile_name:
-                possible_directions = ["up", "right"]
-                possible_directions.remove(self.direction)
-                self.direction = random.choice(possible_directions)
-
-            self.possible_directions = list(self.directions.values())
-            self.possible_directions.remove(self.direction)
+            self.change_direction(tile_name)
 
         self.rect.x += speed_x
         self.rect.y += speed_y
         self.tile_previous = tile_name
+
+    def change_direction(self, tile_name):
+
+        if 'asphalt_junction' == tile_name:
+            self.direction = random.choice(self.possible_directions)
+
+        elif 'asphalt_triple_1' == tile_name:
+            possible_directions = self.possible_directions[:]
+            possible_directions.remove("up")
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_triple_2' == tile_name:
+            possible_directions = self.possible_directions[:]
+            possible_directions.remove("right")
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_triple_3' == tile_name:
+            possible_directions = self.possible_directions[:]
+            possible_directions.remove("down")
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_triple_4' == tile_name:
+            possible_directions = self.possible_directions[:]
+            possible_directions.remove("left")
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_turn_1' == tile_name:
+            possible_directions = ["down", "right"]
+            possible_directions.remove(self.direction)
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_turn_2' == tile_name:
+            possible_directions = ["down", "left"]
+            possible_directions.remove(self.direction)
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_turn_3' == tile_name:
+            possible_directions = ["up", "left"]
+            possible_directions.remove(self.direction)
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_turn_4' == tile_name:
+            possible_directions = ["up", "right"]
+            possible_directions.remove(self.direction)
+            self.direction = random.choice(possible_directions)
+
+        self.possible_directions = list(self.directions.values())
+        self.possible_directions.remove(self.direction)
 
     def update(self, *args, **kwargs) -> None:
         if self.state == "peaceful":
