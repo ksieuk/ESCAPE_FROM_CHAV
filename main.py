@@ -2,6 +2,7 @@ import os
 import sys
 import pygame
 import random
+import math
 
 pygame.init()
 size = WIDTH, HEIGHT = 800, 600
@@ -40,7 +41,8 @@ def load_music(name, type=None):
 
 
 FPS = 50
-STEP = 5
+PLAYER_STEP = 5
+ENEMY_STEP = 10
 
 # основной персонаж
 # player = None
@@ -243,15 +245,15 @@ class Player(pygame.sprite.Sprite):
         key_state = pygame.key.get_pressed()
 
         if key_state[pygame.K_LEFT] or key_state[pygame.K_a]:
-            speed_x = -STEP
+            speed_x = -PLAYER_STEP
             self.image = self.image_left
         if key_state[pygame.K_RIGHT] or key_state[pygame.K_d]:
-            speed_x = STEP
+            speed_x = PLAYER_STEP
             self.image = self.image_right
         if key_state[pygame.K_UP] or key_state[pygame.K_w]:
-            speed_y = -STEP
+            speed_y = -PLAYER_STEP
         if key_state[pygame.K_DOWN] or key_state[pygame.K_s]:
-            speed_y = STEP
+            speed_y = PLAYER_STEP
 
         self.rect.x += speed_x
 
@@ -290,18 +292,21 @@ class Enemy(pygame.sprite.Sprite):
         self.possible_directions = list(self.directions.values())
         self.possible_directions.remove(self.direction)
 
+    def dashing(self):
+        pass
+
     def peaceful_walking(self):
         speed_x = speed_y = 0
         if self.direction == "right":
-            speed_x += STEP
+            speed_x += ENEMY_STEP
             self.image = self.image_right
         if self.direction == "left":
-            speed_x -= STEP
+            speed_x -= ENEMY_STEP
             self.image = self.image_left
         if self.direction == "down":
-            speed_y += STEP
+            speed_y += ENEMY_STEP
         if self.direction == "up":
-            speed_y -= STEP
+            speed_y -= ENEMY_STEP
 
         walls = pygame.sprite.spritecollide(self, walls_group, False, collided=pygame.sprite.collide_rect_ratio(1))
         free_tiles = pygame.sprite.spritecollide(self, tiles_group, False)
@@ -317,6 +322,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += speed_x
         self.rect.y += speed_y
         self.tile_previous = tile_name
+
+    def murderous_run(self):
+        pass
 
     def change_direction(self, tile_name):
 
@@ -364,15 +372,33 @@ class Enemy(pygame.sprite.Sprite):
             self.direction = random.choice(possible_directions)
 
         self.possible_directions = list(self.directions.values())
-        self.possible_directions.remove(self.direction)
+        self.possible_directions.remove(self.directions[self.direction])
 
     def update(self, *args, **kwargs) -> None:
         if self.state == "peaceful":
             self.peaceful_walking()
         elif self.state == "dashing":
-            pass
+            self.dashing()
         elif self.state == "murderous":
-            pass
+            self.murderous_run()
+
+        distance = self.check_distance()
+        if distance < 100:
+            if self.state != "murderous":
+                self.state = "murderous"
+                print(1)
+        elif distance < 400:
+            if self.state != "dashing":
+                self.state = "dashing"
+                print(2)
+        elif self.state != "peaceful":
+            self.state = "peaceful"
+            print(3)
+
+    def check_distance(self):
+        enemy_x, enemy_y = self.rect.x, self.rect.y
+        player_x, player_y = player.rect.x, player.rect.y
+        return int(math.hypot(enemy_x - player_x, enemy_y - player_y))
 
 
 class Camera:
