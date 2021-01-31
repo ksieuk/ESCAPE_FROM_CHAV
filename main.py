@@ -373,8 +373,6 @@ class Enemy(pygame.sprite.Sprite):
             pass
         elif self.state == "murderous":
             pass
-        elif self.state == "murderous":
-            pass
 
 
 class Camera:
