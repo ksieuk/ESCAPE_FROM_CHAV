@@ -34,15 +34,15 @@ def load_music(name, type=None):
             print('Unexpected type')
             return
     except pygame.error as message:
-        print("Cannot load sound ", name)
+        print("Cannot load sound ", namde)
         raise SystemExit(message)
 
     return sound
 
 
 FPS = 50
-PLAYER_STEP = 5
-ENEMY_STEP = 10
+PLAYER_STEP = 8
+ENEMY_STEP = 5
 
 # основной персонаж
 # player = None
@@ -300,23 +300,24 @@ class Enemy(pygame.sprite.Sprite):
         elif self.state == "murderous":
             self.murderous_run()
 
-        distance = self.check_distance()
-        if distance < 100:
-            if self.state != "murderous":
-                self.state = "murderous"
-                print(1)
-        elif distance < 400:
-            if self.state != "dashing":
-                self.state = "dashing"
-                print(2)
-        elif self.state != "peaceful":
-            self.state = "peaceful"
-            print(3)
+        # distance = self.check_distance()[0]
+        # if distance < 100:
+        #     if self.state != "murderous":
+        #         self.state = "murderous"
+        #         print(1)
+        # elif distance < 200:
+        #     if self.state != "dashing":
+        #         self.state = "dashing"
+        #         print(2)
+        # elif self.state != "peaceful":
+        #     self.state = "peaceful"
+        #     print(3)
 
     def check_distance(self):
         enemy_x, enemy_y = self.rect.x, self.rect.y
         player_x, player_y = player.rect.x, player.rect.y
-        return int(math.hypot(enemy_x - player_x, enemy_y - player_y))
+        delta_x, delta_y = enemy_x - player_x, enemy_y - player_y
+        return int(math.hypot(delta_x, delta_y)), delta_x, delta_y
 
     def peaceful_walking(self):
         speed_x = speed_y = 0
@@ -334,9 +335,11 @@ class Enemy(pygame.sprite.Sprite):
         walls = pygame.sprite.spritecollide(self, walls_group, False, collided=pygame.sprite.collide_rect_ratio(1))
         free_tiles = pygame.sprite.spritecollide(self, tiles_group, False)
         if walls:
-            self.direction = self.directions[self.direction]
             speed_x = -speed_x
             speed_y = -speed_y
+            self.possible_directions = list(self.directions.values())
+            self.possible_directions.remove(self.direction)
+            self.direction = self.directions[self.direction]
 
         tile_name = free_tiles[0].name
         if self.tile_previous != tile_name:
@@ -347,7 +350,30 @@ class Enemy(pygame.sprite.Sprite):
         self.tile_previous = tile_name
 
     def dashing(self):
-        pass
+        distance, delta_x, delta_y = self.check_distance()
+
+        delta_x /= distance
+        delta_y /= distance
+
+        speed_x = delta_x * ENEMY_STEP
+        speed_y = delta_y * ENEMY_STEP
+
+        self.rect.x -= speed_x
+        self.rect.y -= speed_y
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_x > 0:
+                self.rect.right = block.rect.left
+            else:
+                self.rect.left = block.rect.right
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_y > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
 
     def murderous_run(self):
         pass
@@ -359,42 +385,55 @@ class Enemy(pygame.sprite.Sprite):
 
         elif 'asphalt_triple_1' == tile_name:
             possible_directions = self.possible_directions[:]
-            possible_directions.remove("up")
+            if "up" in possible_directions:
+                possible_directions.remove("up")
             self.direction = random.choice(possible_directions)
 
         elif 'asphalt_triple_2' == tile_name:
             possible_directions = self.possible_directions[:]
-            possible_directions.remove("right")
+            if "right" in possible_directions:
+                possible_directions.remove("right")
             self.direction = random.choice(possible_directions)
 
         elif 'asphalt_triple_3' == tile_name:
             possible_directions = self.possible_directions[:]
-            possible_directions.remove("down")
+            if "down" in possible_directions:
+                possible_directions.remove("down")
+            print(possible_directions)
             self.direction = random.choice(possible_directions)
 
         elif 'asphalt_triple_4' == tile_name:
             possible_directions = self.possible_directions[:]
-            possible_directions.remove("left")
+            if "left" in possible_directions:
+                possible_directions.remove("left")
             self.direction = random.choice(possible_directions)
 
         elif 'asphalt_turn_1' == tile_name:
             possible_directions = ["down", "right"]
-            possible_directions.remove(self.direction)
+            block_direction = self.directions[self.direction]
+            if block_direction in possible_directions:
+                possible_directions.remove(block_direction)
             self.direction = random.choice(possible_directions)
 
         elif 'asphalt_turn_2' == tile_name:
             possible_directions = ["down", "left"]
-            possible_directions.remove(self.direction)
+            block_direction = self.directions[self.direction]
+            if block_direction in possible_directions:
+                possible_directions.remove(block_direction)
             self.direction = random.choice(possible_directions)
 
         elif 'asphalt_turn_3' == tile_name:
             possible_directions = ["up", "left"]
-            possible_directions.remove(self.direction)
+            block_direction = self.directions[self.direction]
+            if block_direction in possible_directions:
+                possible_directions.remove(block_direction)
             self.direction = random.choice(possible_directions)
 
         elif 'asphalt_turn_4' == tile_name:
             possible_directions = ["up", "right"]
-            possible_directions.remove(self.direction)
+            block_direction = self.directions[self.direction]
+            if block_direction in possible_directions:
+                possible_directions.remove(block_direction)
             self.direction = random.choice(possible_directions)
 
         self.possible_directions = list(self.directions.values())
