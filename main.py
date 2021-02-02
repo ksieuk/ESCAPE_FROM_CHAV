@@ -6,7 +6,7 @@ import math
 from threading import Timer
 
 pygame.init()
-size = WIDTH, HEIGHT = 840, 480
+size = WIDTH, HEIGHT = 1500, 800
 screen = pygame.display.set_mode(size)
 screen.fill((0, 0, 255))
 clock = pygame.time.Clock()
@@ -43,8 +43,8 @@ def load_music(name, type=None):
 
 
 FPS = 50
-PLAYER_STEP = 8
-ENEMY_STEP = 5
+PLAYER_STEP = 30
+ENEMY_STEP = 20
 
 # основной персонаж
 # player = None
@@ -111,7 +111,7 @@ def load_level(name):
         print(f"Файл с уровнем '{filename}' не найден")
         sys.exit()
     # читаем уровень, убирая символы перевода строки
-    with open(filename, 'r') as mapFile:
+    with open(filename, mode='r', encoding='UTF-8') as mapFile:
         level_map = [line.strip() for line in mapFile]
 
     # и подсчитываем максимальную длину
@@ -127,13 +127,15 @@ def generate_level(level):
 
     for y in range(len(level)):
         for x in range(len(level[y])):
-            tile_name = map_symbols[level[y][x]]
-            if tile_name == 'spawn':
+            symbol = level[y][x]
+            tile_name = map_symbols[symbol]
+            if symbol == '@':
                 Tile(tile_name, x, y)
                 new_player = Player(x, y)
-            elif tile_name == 'enemy':
+            elif symbol == '$':
+                Tile('simple_road', x, y)
                 new_enemies.append(Enemy(x, y))
-            elif tile_name.startswith('roof'):
+            elif tile_name.startswith('roof') or tile_name == 'spawn':
                 Wall(tile_name, x, y)
             else:
                 Tile(tile_name, x, y)
@@ -148,29 +150,33 @@ map_symbols = {
     '$': 'enemy',
     '.': 'simple_road',
     '-': 'asphalt_horizontal',
-    'I': 'asphalt_vertical',
+    '|': 'asphalt_vertical',
     '#': 'roof',
-    '1': 'roof_tilt_45',
-    '2': 'roof_tilt_45_revert',
-    '3': 'roof_building_vertical',
-    '4': 'roof_c4',
-    'b': 'roof_bottle',
-    'O': 'ped',
-    '>': 'asphalt_turn_1',
-    '<': 'asphalt_turn_2',
-    '?': 'asphalt_turn_3',
-    ',': 'asphalt_turn_4',
-    '+': 'asphalt_junction',
-    'T': 'asphalt_triple_1',
-    'E': 'asphalt_triple_2',
-    'Y': 'asphalt_triple_3',
-    'L': 'asphalt_triple_4',
+    '/': 'roof_tilt_45',
+    '\\': 'roof_tilt_45_revert',
+    'B': 'roof_bottle',
+    'P': 'ped',
+    '⌜': 'asphalt_turn_1',
+    '⌝': 'asphalt_turn_2',
+    '⌟': 'asphalt_turn_3',
+    '⌞': 'asphalt_turn_4',
+    '╋': 'asphalt_junction',
+    '┳': 'asphalt_triple_1',
+    '┫': 'asphalt_triple_2',
+    '┻': 'asphalt_triple_3',
+    '┣': 'asphalt_triple_4',
     'G': 'grass',
-    'A': 'roof_1',
-    'S': 'roof_2',
-    'D': 'roof_3',
-    'F': 'roof_4',
+    '⌎': 'roof_c1',
+    '⌌': 'roof_c2',
+    '⌍': 'roof_c3',
+    '⌏': 'roof_c4',
+    '_': 'roof_1',
+    '[': 'roof_2',
+    '¯': 'roof_3',
+    ']': 'roof_4',
     'o': 'asphalt_luke',
+    '=': 'spawn',
+    ' ': 'simple_road',
 }
 
 tile_images = {
@@ -188,6 +194,9 @@ tile_images = {
     'roof_tilt_45': load_image('roof_front.png'),
     'roof_tilt_45_revert': load_image('roof_back.png'),
     'roof_building_vertical': load_image('roof_building.png'),
+    'roof_c1': load_image('roof_corner_1.png'),
+    'roof_c2': load_image('roof_corner_2.png'),
+    'roof_c3': load_image('roof_corner_3.png'),
     'roof_c4': load_image('roof_corner_4.png'),
     'spawn': load_image('center.png'),
     'simple_road': load_image('asphalt_black.png'),
@@ -306,7 +315,7 @@ class Enemy(pygame.sprite.Sprite):
             return
 
         distance = self.check_distance()[0]
-        if distance < 10:
+        if distance < 30:
             if self.state != "freezing":
                 self.state = "freezing"
                 freezing = Timer(self.freeze_time, self.stop_freezing)
@@ -314,7 +323,7 @@ class Enemy(pygame.sprite.Sprite):
         elif distance < 100:
             if self.state != "murderous":
                 self.state = "murderous"
-        elif distance < 200:
+        elif distance < 450:
             if self.state != "dashing":
                 self.state = "dashing"
         elif self.state != "peaceful":
