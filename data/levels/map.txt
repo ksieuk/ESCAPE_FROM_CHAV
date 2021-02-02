@@ -4,9 +4,9 @@ AA4O.I.O22222222.I.AA4O.I.O22222222.I.#
 ##FO.I.O11111111.I.##FO.I.O11111111.I.#
 AA4O.I.O11111111.I.AA4O.I.O11111111.I.#
 AA4O.I.O33333333.I.AA4O.I.O33333333.I.#
-OOOO.I.OOOOOOOOO.I.OOOO.I.OOOOOOOOO.I.#
-...#.I..........oI......I..........oI.#
----#-@-----------Y------+-----------Y-#
+OOOO.I.OO@OOOOOO.I.OOOO.I.OOOOOOOOO.I.#
+...#.I$.........oI......I........$.oI.#
+---#-+-----------Y------+-----------Y-#
 ...#.I..........$.......I.............#
 OOOO.I.OOOOOOOOOOOOOOOO.I.OOOOOOOOOOOO#
 DD3O.I.O2DDDDDDDD3ODD3O.I.O2DDDDDDDD3O#

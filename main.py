@@ -6,13 +6,14 @@ import math
 from threading import Timer
 
 pygame.init()
-size = WIDTH, HEIGHT = 800, 600
+size = WIDTH, HEIGHT = 840, 480
 screen = pygame.display.set_mode(size)
 screen.fill((0, 0, 255))
 clock = pygame.time.Clock()
 TILE_WIDTH = TILE_HEIGHT = 50
 VOLUME = 0.1
 background_music = ['colonel_bg.mp3', 'blood_bg.mp3', 'dont_bg.mp3', 'osen_bg.mp3', 'zarya_bg.mp3']
+enemy_skins = ['gopnik_first.png', 'gopnik_boss.png']
 
 
 def load_music(name, type=None):
@@ -201,7 +202,7 @@ tile_images = {
     'asphalt_luke': load_image('asphalt_luke.png')
 }
 player_image = load_image('main.png')
-enemy_image = load_image('musor.png')
+enemy_image = load_image(random.choice(enemy_skins))
 
 
 class Tile(pygame.sprite.Sprite):
@@ -263,6 +264,14 @@ class Player(pygame.sprite.Sprite):
                 self.rect.bottom = block.rect.top
             else:
                 self.rect.top = block.rect.bottom
+
+
+class Button:
+    def __init__(self, tile_type: str, pos_x: int, pos_y: int):
+        super().__init__(walls_group, all_sprites)
+        self.image = tile_images[tile_type]
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -507,7 +516,7 @@ pygame.mixer.music.play(0)
 file_name = r"map.txt"
 
 player, enemies, level_x, level_y = generate_level(load_level(file_name))
-
+# button = Button(100, 100)
 running = True
 while running:
     events = pygame.event.get()
@@ -519,7 +528,7 @@ while running:
         if event.type == SONG_END:
             load_music(random.choice(background_music), 'song')
             pygame.mixer.music.play(0)
-
+    # pygame.draw.rect(screen, (55, 55, 55), (100, 100, 100, 100))
     player.update()
     camera.update(player)
     for sprite in all_sprites:
