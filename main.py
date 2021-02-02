@@ -35,7 +35,7 @@ def load_music(name, type=None):
             print('Unexpected type')
             return
     except pygame.error as message:
-        print("Cannot load sound ", namde)
+        print("Cannot load sound ", name)
         raise SystemExit(message)
 
     return sound
