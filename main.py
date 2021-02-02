@@ -295,10 +295,14 @@ class Enemy(pygame.sprite.Sprite):
     def update(self, *args, **kwargs) -> None:
         if self.state == "peaceful":
             self.peaceful_walking()
+        elif self.state == "go_to_road":
+            self.go_to_road()
         elif self.state == "dashing":
             self.dashing()
         elif self.state == "murderous":
             self.murderous_run()
+        elif self.state == "freezing":
+            pass
 
         distance = self.check_distance()[0]
         if distance < 100:
@@ -309,8 +313,11 @@ class Enemy(pygame.sprite.Sprite):
             if self.state != "dashing":
                 self.state = "dashing"
                 print(2)
+        elif distance == 0:
+            if self.state != "freezing":
+                self.state = "freezing"
         elif self.state != "peaceful":
-            self.state = "peaceful"
+            self.state = "go_to_road"
             print(3)
 
     def check_distance(self):
@@ -349,6 +356,19 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y += speed_y
         self.tile_previous = tile_name
 
+    def go_to_road(self):
+        free_tiles = pygame.sprite.spritecollide(self, tiles_group, False)
+        tile_name = free_tiles[0].name
+        if tile_name.startswith("asphalt") and tile_name != "asphalt_black":
+            self.state = "peaceful"
+            if tile_name == "asphalt_horizontal":
+                self.direction = random.choice(("right", "left"))
+            elif tile_name == "asphalt_vertical":
+                self.direction = random.choice(("up", "down"))
+            else:
+                self.change_direction(tile_name)
+        self.peaceful_walking()
+
     def dashing(self):
         distance, delta_x, delta_y = self.check_distance()
 
@@ -376,6 +396,35 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.top = block.rect.bottom
 
     def murderous_run(self):
+        distance, delta_x, delta_y = self.check_distance()
+        if distance == 0:
+            self.state = "freezing"
+            return
+
+        delta_x /= distance
+        delta_y /= distance
+
+        speed_x = -delta_x * ENEMY_STEP * 3
+        speed_y = -delta_y * ENEMY_STEP * 3
+
+        self.rect.x += speed_x
+        self.rect.y += speed_y
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_x > 0:
+                self.rect.right = block.rect.left
+            else:
+                self.rect.left = block.rect.right
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_y > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
+
+    def freeze(self):
         pass
 
     def change_direction(self, tile_name):
