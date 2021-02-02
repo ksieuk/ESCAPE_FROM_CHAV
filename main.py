@@ -2,6 +2,8 @@ import os
 import sys
 import pygame
 import random
+import math
+from threading import Timer
 
 pygame.init()
 size = WIDTH, HEIGHT = 800, 600
@@ -40,7 +42,8 @@ def load_music(name, type=None):
 
 
 FPS = 50
-STEP = 5
+PLAYER_STEP = 8
+ENEMY_STEP = 5
 
 # основной персонаж
 # player = None
@@ -50,6 +53,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 walls_group = pygame.sprite.Group()
+enemies_group = pygame.sprite.Group()
 
 
 def load_image(name, color_key=None):
@@ -128,6 +132,7 @@ def load_level(name):
 
 def generate_level(level):
     new_player, x, y = None, None, None
+    new_enemies = []
 
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -135,18 +140,21 @@ def generate_level(level):
             if tile_name == 'spawn':
                 Tile(tile_name, x, y)
                 new_player = Player(x, y)
+            elif tile_name == 'enemy':
+                new_enemies.append(Enemy(x, y))
             elif tile_name.startswith('roof'):
                 Wall(tile_name, x, y)
             else:
                 Tile(tile_name, x, y)
 
     # вернем игрока, а также размер поля в клетках
-    return new_player, x, y
+    return new_player, new_enemies, x, y
 
 
 # словарь для карты
 map_symbols = {
     '@': 'spawn',
+    '$': 'enemy',
     '.': 'simple_road',
     '-': 'asphalt_horizontal',
     'I': 'asphalt_vertical',
@@ -203,6 +211,7 @@ tile_images = {
     'asphalt_luke': load_image('asphalt_luke.png')
 }
 player_image = load_image('gopnik_first.png')
+enemy_image = load_image('mario.png')
 
 
 class Tile(pygame.sprite.Sprite):
@@ -211,6 +220,7 @@ class Tile(pygame.sprite.Sprite):
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+        self.name = tile_type
 
 
 class Wall(pygame.sprite.Sprite):
@@ -225,7 +235,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image_left = player_image
-        self.image_right = pygame.transform.flip(player_image, True, False)
+        self.image_right = pygame.transform.flip(self.image_left, True, False)
         self.image = self.image_left
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5)
@@ -236,15 +246,15 @@ class Player(pygame.sprite.Sprite):
         key_state = pygame.key.get_pressed()
 
         if key_state[pygame.K_LEFT] or key_state[pygame.K_a]:
-            speed_x = -STEP
+            speed_x = -PLAYER_STEP
             self.image = self.image_left
         if key_state[pygame.K_RIGHT] or key_state[pygame.K_d]:
-            speed_x = STEP
+            speed_x = PLAYER_STEP
             self.image = self.image_right
         if key_state[pygame.K_UP] or key_state[pygame.K_w]:
-            speed_y = -STEP
+            speed_y = -PLAYER_STEP
         if key_state[pygame.K_DOWN] or key_state[pygame.K_s]:
-            speed_y = STEP
+            speed_y = PLAYER_STEP
 
         self.rect.x += speed_x
 
@@ -263,6 +273,220 @@ class Player(pygame.sprite.Sprite):
                 self.rect.bottom = block.rect.top
             else:
                 self.rect.top = block.rect.bottom
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(enemies_group, all_sprites)
+        self.image_left = enemy_image
+        self.image_right = pygame.transform.flip(self.image_left, True, False)
+        self.image = self.image_left
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5 - 50)
+        self.state = "peaceful"
+        self.direction = "left"
+        self.directions = {"up": "down",
+                           "down": "up",
+                           "left": "right",
+                           "right": "left"}
+        self.tile_previous = None
+        self.possible_directions = list(self.directions.values())
+        self.possible_directions.remove(self.direction)
+        self.freeze_time = 3.0
+
+    def update(self) -> None:
+        if self.state == "peaceful":
+            self.peaceful_walking()
+        elif self.state == "go_to_road":
+            self.go_to_road()
+        elif self.state == "dashing":
+            self.dashing()
+        elif self.state == "murderous":
+            self.murderous_run()
+        elif self.state == "freezing":
+            return
+
+        distance = self.check_distance()[0]
+        if distance < 10:
+            if self.state != "freezing":
+                self.state = "freezing"
+                freezing = Timer(self.freeze_time, self.stop_freezing)
+                freezing.start()
+        elif distance < 100:
+            if self.state != "murderous":
+                self.state = "murderous"
+        elif distance < 200:
+            if self.state != "dashing":
+                self.state = "dashing"
+        elif self.state != "peaceful":
+            self.state = "go_to_road"
+
+    def check_distance(self):
+        enemy_x, enemy_y = self.rect.x, self.rect.y
+        player_x, player_y = player.rect.x, player.rect.y
+        delta_x, delta_y = enemy_x - player_x, enemy_y - player_y
+        return int(math.hypot(delta_x, delta_y)), delta_x, delta_y
+
+    def peaceful_walking(self):
+        speed_x = speed_y = 0
+        if self.direction == "right":
+            speed_x += ENEMY_STEP
+            self.image = self.image_right
+        if self.direction == "left":
+            speed_x -= ENEMY_STEP
+            self.image = self.image_left
+        if self.direction == "down":
+            speed_y += ENEMY_STEP
+        if self.direction == "up":
+            speed_y -= ENEMY_STEP
+
+        walls = pygame.sprite.spritecollide(self, walls_group, False, collided=pygame.sprite.collide_rect_ratio(1))
+        free_tiles = pygame.sprite.spritecollide(self, tiles_group, False)
+        if walls:
+            speed_x = -speed_x
+            speed_y = -speed_y
+            self.possible_directions = list(self.directions.values())
+            self.possible_directions.remove(self.direction)
+            self.direction = self.directions[self.direction]
+
+        tile_name = free_tiles[0].name
+        if self.tile_previous != tile_name:
+            self.change_direction(tile_name)
+
+        self.rect.x += speed_x
+        self.rect.y += speed_y
+        self.tile_previous = tile_name
+
+    def go_to_road(self):
+        free_tiles = pygame.sprite.spritecollide(self, tiles_group, False)
+        tile_name = free_tiles[0].name
+        if tile_name.startswith("asphalt") and tile_name != "asphalt_black":
+            self.state = "peaceful"
+            if tile_name == "asphalt_horizontal":
+                self.direction = random.choice(("right", "left"))
+            elif tile_name == "asphalt_vertical":
+                self.direction = random.choice(("up", "down"))
+            else:
+                self.change_direction(tile_name)
+        self.peaceful_walking()
+
+    def dashing(self):
+        distance, delta_x, delta_y = self.check_distance()
+
+        delta_x /= distance
+        delta_y /= distance
+
+        speed_x = -delta_x * ENEMY_STEP
+        speed_y = -delta_y * ENEMY_STEP
+
+        self.rect.x += speed_x
+        self.rect.y += speed_y
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_x > 0:
+                self.rect.right = block.rect.left
+            else:
+                self.rect.left = block.rect.right
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_y > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
+
+    def murderous_run(self):
+        distance, delta_x, delta_y = self.check_distance()
+        if distance == 0:
+            self.state = "freezing"
+            return
+
+        delta_x /= distance
+        delta_y /= distance
+
+        speed_x = -delta_x * ENEMY_STEP * 3
+        speed_y = -delta_y * ENEMY_STEP * 3
+
+        self.rect.x += speed_x
+        self.rect.y += speed_y
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_x > 0:
+                self.rect.right = block.rect.left
+            else:
+                self.rect.left = block.rect.right
+
+        walls_list = pygame.sprite.spritecollide(self, walls_group, False)
+        for block in walls_list:
+            if speed_y > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
+
+    def stop_freezing(self):
+        self.state = "go_to_road"
+
+    def change_direction(self, tile_name):
+
+        if 'asphalt_junction' == tile_name:
+            self.direction = random.choice(self.possible_directions)
+
+        elif 'asphalt_triple_1' == tile_name:
+            possible_directions = self.possible_directions[:]
+            if "up" in possible_directions:
+                possible_directions.remove("up")
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_triple_2' == tile_name:
+            possible_directions = self.possible_directions[:]
+            if "right" in possible_directions:
+                possible_directions.remove("right")
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_triple_3' == tile_name:
+            possible_directions = self.possible_directions[:]
+            if "down" in possible_directions:
+                possible_directions.remove("down")
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_triple_4' == tile_name:
+            possible_directions = self.possible_directions[:]
+            if "left" in possible_directions:
+                possible_directions.remove("left")
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_turn_1' == tile_name:
+            possible_directions = ["down", "right"]
+            block_direction = self.directions[self.direction]
+            if block_direction in possible_directions:
+                possible_directions.remove(block_direction)
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_turn_2' == tile_name:
+            possible_directions = ["down", "left"]
+            block_direction = self.directions[self.direction]
+            if block_direction in possible_directions:
+                possible_directions.remove(block_direction)
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_turn_3' == tile_name:
+            possible_directions = ["up", "left"]
+            block_direction = self.directions[self.direction]
+            if block_direction in possible_directions:
+                possible_directions.remove(block_direction)
+            self.direction = random.choice(possible_directions)
+
+        elif 'asphalt_turn_4' == tile_name:
+            possible_directions = ["up", "right"]
+            block_direction = self.directions[self.direction]
+            if block_direction in possible_directions:
+                possible_directions.remove(block_direction)
+            self.direction = random.choice(possible_directions)
+
+        self.possible_directions = list(self.directions.values())
+        self.possible_directions.remove(self.directions[self.direction])
 
 
 class Camera:
@@ -292,7 +516,7 @@ load_music(random.choice(background_music), 'song')
 pygame.mixer.music.play(0)
 file_name = r"map.txt"
 
-player, level_x, level_y = generate_level(load_level(file_name))
+player, enemies, level_x, level_y = generate_level(load_level(file_name))
 
 running = True
 while running:
@@ -310,10 +534,13 @@ while running:
     camera.update(player)
     for sprite in all_sprites:
         camera.apply(sprite)
+    for enemy in enemies:
+        enemy.update()
 
     screen.fill(pygame.Color(0, 0, 255))
     all_sprites.draw(screen)
     player_group.draw(screen)
+    enemies_group.draw(screen)
 
     pygame.display.flip()
     clock.tick(FPS)
