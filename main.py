@@ -81,18 +81,21 @@ def terminate():
 
 
 def start_screen():
-    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
+    show = True
+    menu_background = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
 
+    # escape_btn = Button(512, 160)
 
-    while True:
+    while show:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
                 return  # начинаем игру
+
+        screen.blit(menu_background, (0, 0))
+        # escape_btn.draw(300, 200, 'escape', None)
         pygame.display.flip()
         clock.tick(FPS)
 
