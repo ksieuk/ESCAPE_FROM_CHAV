@@ -3,6 +3,7 @@ import sys
 import pygame
 import random
 import math
+from threading import Timer
 
 pygame.init()
 size = WIDTH, HEIGHT = 800, 600
@@ -291,8 +292,9 @@ class Enemy(pygame.sprite.Sprite):
         self.tile_previous = None
         self.possible_directions = list(self.directions.values())
         self.possible_directions.remove(self.direction)
+        self.freeze_time = 3.0
 
-    def update(self, *args, **kwargs) -> None:
+    def update(self) -> None:
         if self.state == "peaceful":
             self.peaceful_walking()
         elif self.state == "go_to_road":
@@ -302,23 +304,22 @@ class Enemy(pygame.sprite.Sprite):
         elif self.state == "murderous":
             self.murderous_run()
         elif self.state == "freezing":
-            pass
+            return
 
         distance = self.check_distance()[0]
-        if distance < 100:
+        if distance < 10:
+            if self.state != "freezing":
+                self.state = "freezing"
+                freezing = Timer(self.freeze_time, self.stop_freezing)
+                freezing.start()
+        elif distance < 100:
             if self.state != "murderous":
                 self.state = "murderous"
-                print(1)
         elif distance < 200:
             if self.state != "dashing":
                 self.state = "dashing"
-                print(2)
-        elif distance == 0:
-            if self.state != "freezing":
-                self.state = "freezing"
         elif self.state != "peaceful":
             self.state = "go_to_road"
-            print(3)
 
     def check_distance(self):
         enemy_x, enemy_y = self.rect.x, self.rect.y
@@ -424,8 +425,8 @@ class Enemy(pygame.sprite.Sprite):
             else:
                 self.rect.top = block.rect.bottom
 
-    def freeze(self):
-        pass
+    def stop_freezing(self):
+        self.state = "go_to_road"
 
     def change_direction(self, tile_name):
 
