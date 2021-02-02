@@ -2,6 +2,8 @@ import os
 import sys
 import pygame
 import random
+import math
+from threading import Timer
 
 pygame.init()
 size = WIDTH, HEIGHT = 800, 600
