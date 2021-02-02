@@ -300,18 +300,18 @@ class Enemy(pygame.sprite.Sprite):
         elif self.state == "murderous":
             self.murderous_run()
 
-        # distance = self.check_distance()[0]
-        # if distance < 100:
-        #     if self.state != "murderous":
-        #         self.state = "murderous"
-        #         print(1)
-        # elif distance < 200:
-        #     if self.state != "dashing":
-        #         self.state = "dashing"
-        #         print(2)
-        # elif self.state != "peaceful":
-        #     self.state = "peaceful"
-        #     print(3)
+        distance = self.check_distance()[0]
+        if distance < 100:
+            if self.state != "murderous":
+                self.state = "murderous"
+                print(1)
+        elif distance < 200:
+            if self.state != "dashing":
+                self.state = "dashing"
+                print(2)
+        elif self.state != "peaceful":
+            self.state = "peaceful"
+            print(3)
 
     def check_distance(self):
         enemy_x, enemy_y = self.rect.x, self.rect.y
@@ -355,11 +355,11 @@ class Enemy(pygame.sprite.Sprite):
         delta_x /= distance
         delta_y /= distance
 
-        speed_x = delta_x * ENEMY_STEP
-        speed_y = delta_y * ENEMY_STEP
+        speed_x = -delta_x * ENEMY_STEP
+        speed_y = -delta_y * ENEMY_STEP
 
-        self.rect.x -= speed_x
-        self.rect.y -= speed_y
+        self.rect.x += speed_x
+        self.rect.y += speed_y
 
         walls_list = pygame.sprite.spritecollide(self, walls_group, False)
         for block in walls_list:
@@ -399,7 +399,6 @@ class Enemy(pygame.sprite.Sprite):
             possible_directions = self.possible_directions[:]
             if "down" in possible_directions:
                 possible_directions.remove("down")
-            print(possible_directions)
             self.direction = random.choice(possible_directions)
 
         elif 'asphalt_triple_4' == tile_name:
