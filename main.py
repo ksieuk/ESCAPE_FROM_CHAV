@@ -113,6 +113,11 @@ def start_screen():
 
 
 health_image = load_image('truba.png')
+beat_sound = load_music('beat.mp3', 'sound')
+loose = load_music('loose.mp3', 'sound')
+
+def game_over():
+    pass
 
 def show_hp():
     global health_counter
@@ -122,6 +127,17 @@ def show_hp():
         screen.blit(health_image, (x, 20))
         x += 30
         show += 1
+
+
+def check_hp():
+    global health_counter
+    health_counter -= 1
+    if health_counter == 0:
+        loose.play()
+        return False
+    else:
+        beat_sound.play()
+        return True
 
 
 def load_level(name):
@@ -293,16 +309,6 @@ class Player(pygame.sprite.Sprite):
                 self.rect.top = block.rect.bottom
 
 
-"""
-class Button:
-    def __init__(self, tile_type: str, pos_x: int, pos_y: int):
-        super().__init__(walls_group, all_sprites)
-        self.image = tile_images[tile_type]
-        self.rect = self.image.get_rect().move(
-            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
-"""
-
-
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, skin):
         super().__init__(enemies_group, all_sprites)
@@ -324,7 +330,6 @@ class Enemy(pygame.sprite.Sprite):
         self.freeze_time = 3.0
 
     def update(self) -> None:
-        global health_counter
         if self.state == "peaceful":
             self.peaceful_walking()
         elif self.state == "go_to_road":
@@ -340,7 +345,7 @@ class Enemy(pygame.sprite.Sprite):
         if distance < 30:
             if self.state != "freezing":
                 self.state = "freezing"
-                health_counter -= 1
+                check_hp()
                 freezing = Timer(self.freeze_time, self.stop_freezing)
                 freezing.start()
         elif distance < 100:
