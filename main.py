@@ -105,6 +105,8 @@ def start_screen():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.mixer.Sound.play(menu_sound)
                     terminate()
+            elif event.type == pygame.QUIT:
+                terminate()
             else:
                 screen.blit(pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT)), (0, 0))
 
@@ -116,8 +118,12 @@ health_image = load_image('truba.png')
 beat_sound = load_music('beat.mp3', 'sound')
 loose = load_music('loose.mp3', 'sound')
 
+
 def game_over():
-    pass
+    global health_counter
+    health_counter = 3
+    start_screen()
+
 
 def show_hp():
     global health_counter
@@ -131,13 +137,13 @@ def show_hp():
 
 def check_hp():
     global health_counter
-    health_counter -= 1
-    if health_counter == 0:
+    if health_counter - 1 == 0:
+        health_counter -= 1
         loose.play()
-        return False
-    else:
+        game_over()
+    elif health_counter - 1 > 0:
+        health_counter -= 1
         beat_sound.play()
-        return True
 
 
 def load_level(name):
@@ -170,7 +176,7 @@ def generate_level(level):
             elif symbol == '$':
                 Tile('simple_road', x, y)
                 new_enemies.append(Enemy(x, y, random.choice(enemy_skins)))
-            elif tile_name.startswith('roof') or tile_name == 'spawn':
+            elif tile_name.startswith('roof') or tile_name == 'background':
                 Wall(tile_name, x, y)
             else:
                 Tile(tile_name, x, y)
@@ -210,7 +216,7 @@ map_symbols = {
     '¯': 'roof_3',
     ']': 'roof_4',
     'o': 'asphalt_luke',
-    '=': 'spawn',
+    '=': 'background',
     ' ': 'simple_road',
 }
 
@@ -243,6 +249,7 @@ tile_images = {
     'roof_2': load_image('roof_2.png'),
     'roof_3': load_image('roof_3.png'),
     'roof_4': load_image('roof_4.png'),
+    'background': load_image('background.png'),
     'asphalt_luke': load_image('asphalt_luke.png')
 }
 player_image = load_image('main.png')
@@ -570,7 +577,7 @@ while running:
     for enemy in enemies:
         enemy.update()
 
-    screen.fill(pygame.Color(0, 0, 255))
+    screen.fill(pygame.Color(0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
     enemies_group.draw(screen)
