@@ -15,7 +15,6 @@ VOLUME = 0.1
 background_music = ['colonel_bg.mp3', 'blood_bg.mp3', 'dont_bg.mp3', 'osen_bg.mp3', 'zarya_bg.mp3']
 enemy_skins = ['gopnik_first.png', 'gopnik_first.png', 'gopnik_boss.png']
 health_counter = 3
-img_counter = 0
 
 
 def load_music(name, type=None):
@@ -325,6 +324,7 @@ class Enemy(pygame.sprite.Sprite):
         self.freeze_time = 3.0
 
     def update(self) -> None:
+        global health_counter
         if self.state == "peaceful":
             self.peaceful_walking()
         elif self.state == "go_to_road":
@@ -340,6 +340,7 @@ class Enemy(pygame.sprite.Sprite):
         if distance < 30:
             if self.state != "freezing":
                 self.state = "freezing"
+                health_counter -= 1
                 freezing = Timer(self.freeze_time, self.stop_freezing)
                 freezing.start()
         elif distance < 100:
