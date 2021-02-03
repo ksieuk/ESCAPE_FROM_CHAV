@@ -13,7 +13,8 @@ clock = pygame.time.Clock()
 TILE_WIDTH = TILE_HEIGHT = 50
 VOLUME = 0.1
 background_music = ['colonel_bg.mp3', 'blood_bg.mp3', 'dont_bg.mp3', 'osen_bg.mp3', 'zarya_bg.mp3']
-enemy_skins = ['gopnik_first.png', 'gopnik_boss.png']
+enemy_skins = ['gopnik_first.png', 'gopnik_first.png', 'gopnik_boss.png']
+health_counter = 2
 
 
 def load_music(name, type=None):
@@ -84,34 +85,43 @@ def terminate():
     pygame.quit()
     sys.exit()
 
+
 menu_sound = load_music('button.mp3', 'sound')
+
 
 def start_screen():
     show = True
     while show:
         coords = pygame.mouse.get_pos()
         x, y = coords[0], coords[1]
-        if (x > 489 and x < 990) and (y < 385 and y > 285):
-            screen.blit(pygame.transform.scale(load_image('fon_play.jpg'), (WIDTH, HEIGHT)), (0, 0))
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pygame.mixer.Sound.play(menu_sound)
-                return
-        elif (x > 489 and x < 990) and (y < 531 and y > 421):
-            screen.blit(pygame.transform.scale(load_image('fon_quit.jpg'), (WIDTH, HEIGHT)), (0, 0))
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pygame.mixer.Sound.play(menu_sound)
-                terminate()
-        else:
-            screen.blit(pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT)), (0, 0))
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-                return  # начинаем игру
+            if (x > 489 and x < 990) and (y < 385 and y > 285):
+                screen.blit(pygame.transform.scale(load_image('fon_play.jpg'), (WIDTH, HEIGHT)), (0, 0))
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.mixer.Sound.play(menu_sound)
+                    return
+            elif (x > 489 and x < 990) and (y < 531 and y > 421):
+                screen.blit(pygame.transform.scale(load_image('fon_quit.jpg'), (WIDTH, HEIGHT)), (0, 0))
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.mixer.Sound.play(menu_sound)
+                    terminate()
+            else:
+                screen.blit(pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT)), (0, 0))
 
-        # screen.blit(menu_background, (0, 0))
-        # escape_btn.draw(300, 200, 'escape', None)
         pygame.display.flip()
         clock.tick(FPS)
+
+
+health_image = load_image('truba.png')
+
+def show_hp():
+    global health_counter
+    show = 0
+    x = 20
+    while show != health_counter:
+        screen.blit(health_image, (x, 20))
+        x += 60
+        show += 1
 
 
 def load_level(name):
@@ -143,7 +153,7 @@ def generate_level(level):
                 new_player = Player(x, y)
             elif symbol == '$':
                 Tile('simple_road', x, y)
-                new_enemies.append(Enemy(x, y))
+                new_enemies.append(Enemy(x, y, random.choice(enemy_skins)))
             elif tile_name.startswith('roof') or tile_name == 'spawn':
                 Wall(tile_name, x, y)
             else:
@@ -220,7 +230,6 @@ tile_images = {
     'asphalt_luke': load_image('asphalt_luke.png')
 }
 player_image = load_image('main.png')
-enemy_image = load_image(random.choice(enemy_skins))
 
 
 class Tile(pygame.sprite.Sprite):
@@ -295,8 +304,9 @@ class Button:
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
+    def __init__(self, pos_x, pos_y, skin):
         super().__init__(enemies_group, all_sprites)
+        enemy_image = load_image(skin)
         self.image_left = enemy_image
         self.image_right = pygame.transform.flip(self.image_left, True, False)
         self.image = self.image_left
@@ -540,7 +550,6 @@ running = True
 while running:
     events = pygame.event.get()
     for event in events:
-
         if event.type == pygame.QUIT:
             running = False
             terminate()
@@ -549,6 +558,7 @@ while running:
             pygame.mixer.music.play(0)
     player.update()
     camera.update(player)
+    show_hp()
     for sprite in all_sprites:
         camera.apply(sprite)
     for enemy in enemies:
