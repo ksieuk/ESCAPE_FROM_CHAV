@@ -45,7 +45,7 @@ def load_music(name, type=None):
 
 FPS = 50
 PLAYER_STEP = 15
-ENEMY_STEP = 16
+ENEMY_STEP = 10
 
 # основной персонаж
 # player = None
@@ -56,6 +56,7 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 walls_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
+houses_group = pygame.sprite.Group()
 
 
 def load_image(name, color_key=None):
@@ -95,12 +96,12 @@ def start_screen():
         coords = pygame.mouse.get_pos()
         x, y = coords[0], coords[1]
         for event in pygame.event.get():
-            if (x > 489 and x < 990) and (y < 385 and y > 285):
+            if (489 < x < 990) and (385 > y > 285):
                 screen.blit(pygame.transform.scale(load_image('fon_play.jpg'), (WIDTH, HEIGHT)), (0, 0))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.mixer.Sound.play(menu_sound)
                     return
-            elif (x > 489 and x < 990) and (y < 531 and y > 421):
+            elif (489 < x < 990) and (531 > y > 421):
                 screen.blit(pygame.transform.scale(load_image('fon_quit.jpg'), (WIDTH, HEIGHT)), (0, 0))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.mixer.Sound.play(menu_sound)
@@ -176,6 +177,8 @@ def generate_level(level):
             elif symbol == '$':
                 Tile('simple_road', x, y)
                 new_enemies.append(Enemy(x, y, random.choice(enemy_skins)))
+            elif tile_name == 'roof':
+                House(tile_name, x, y)
             elif tile_name.startswith('roof') or tile_name == 'background':
                 Wall(tile_name, x, y)
             else:
@@ -267,6 +270,14 @@ class Tile(pygame.sprite.Sprite):
 class Wall(pygame.sprite.Sprite):
     def __init__(self, tile_type: str, pos_x: int, pos_y: int):
         super().__init__(walls_group, all_sprites)
+        self.image = tile_images[tile_type]
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+
+
+class House(pygame.sprite.Sprite):
+    def __init__(self, tile_type: str, pos_x: int, pos_y: int):
+        super().__init__(houses_group, all_sprites)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
