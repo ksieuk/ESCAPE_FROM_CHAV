@@ -84,22 +84,31 @@ def terminate():
     pygame.quit()
     sys.exit()
 
+menu_sound = load_music('button.mp3', 'sound')
 
 def start_screen():
     show = True
-    menu_background = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-
-    # escape_btn = Button(512, 160)
-
     while show:
+        coords = pygame.mouse.get_pos()
+        x, y = coords[0], coords[1]
+        if (x > 489 and x < 990) and (y < 385 and y > 285):
+            screen.blit(pygame.transform.scale(load_image('fon_play.jpg'), (WIDTH, HEIGHT)), (0, 0))
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.mixer.Sound.play(menu_sound)
+                return
+        elif (x > 489 and x < 990) and (y < 531 and y > 421):
+            screen.blit(pygame.transform.scale(load_image('fon_quit.jpg'), (WIDTH, HEIGHT)), (0, 0))
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.mixer.Sound.play(menu_sound)
+                terminate()
+        else:
+            screen.blit(pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT)), (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
                 return  # начинаем игру
 
-        screen.blit(menu_background, (0, 0))
+        # screen.blit(menu_background, (0, 0))
         # escape_btn.draw(300, 200, 'escape', None)
         pygame.display.flip()
         clock.tick(FPS)
@@ -275,12 +284,14 @@ class Player(pygame.sprite.Sprite):
                 self.rect.top = block.rect.bottom
 
 
+"""
 class Button:
     def __init__(self, tile_type: str, pos_x: int, pos_y: int):
         super().__init__(walls_group, all_sprites)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+"""
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -525,7 +536,6 @@ pygame.mixer.music.play(0)
 file_name = r"map.txt"
 
 player, enemies, level_x, level_y = generate_level(load_level(file_name))
-# button = Button(100, 100)
 running = True
 while running:
     events = pygame.event.get()
@@ -537,7 +547,6 @@ while running:
         if event.type == SONG_END:
             load_music(random.choice(background_music), 'song')
             pygame.mixer.music.play(0)
-    # pygame.draw.rect(screen, (55, 55, 55), (100, 100, 100, 100))
     player.update()
     camera.update(player)
     for sprite in all_sprites:
