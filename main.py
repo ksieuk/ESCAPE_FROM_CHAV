@@ -14,7 +14,8 @@ TILE_WIDTH = TILE_HEIGHT = 50
 VOLUME = 0.1
 background_music = ['colonel_bg.mp3', 'blood_bg.mp3', 'dont_bg.mp3', 'osen_bg.mp3', 'zarya_bg.mp3']
 enemy_skins = ['gopnik_first.png', 'gopnik_first.png', 'gopnik_boss.png']
-health_counter = 2
+health_counter = 3
+img_counter = 0
 
 
 def load_music(name, type=None):
@@ -44,8 +45,8 @@ def load_music(name, type=None):
 
 
 FPS = 50
-PLAYER_STEP = 30
-ENEMY_STEP = 20
+PLAYER_STEP = 15
+ENEMY_STEP = 16
 
 # основной персонаж
 # player = None
@@ -120,7 +121,7 @@ def show_hp():
     x = 20
     while show != health_counter:
         screen.blit(health_image, (x, 20))
-        x += 60
+        x += 30
         show += 1
 
 
@@ -558,7 +559,6 @@ while running:
             pygame.mixer.music.play(0)
     player.update()
     camera.update(player)
-    show_hp()
     for sprite in all_sprites:
         camera.apply(sprite)
     for enemy in enemies:
@@ -568,6 +568,7 @@ while running:
     all_sprites.draw(screen)
     player_group.draw(screen)
     enemies_group.draw(screen)
+    show_hp()
 
     pygame.display.flip()
     clock.tick(FPS)
