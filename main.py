@@ -13,6 +13,8 @@ clock = pygame.time.Clock()
 TILE_WIDTH = TILE_HEIGHT = 50
 VOLUME = 0.1
 background_music = ['colonel_bg.mp3', 'blood_bg.mp3', 'dont_bg.mp3', 'osen_bg.mp3', 'zarya_bg.mp3']
+enemy_skins = ['gopnik_first.png', 'gopnik_first.png', 'gopnik_boss.png']
+health_counter = 3
 
 
 def load_music(name, type=None):
@@ -42,8 +44,8 @@ def load_music(name, type=None):
 
 
 FPS = 50
-PLAYER_STEP = 30
-ENEMY_STEP = 20
+PLAYER_STEP = 15
+ENEMY_STEP = 16
 
 # основной персонаж
 # player = None
@@ -84,24 +86,64 @@ def terminate():
     sys.exit()
 
 
+menu_sound = load_music('button.mp3', 'sound')
+
+
 def start_screen():
     show = True
-    menu_background = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-
-    # escape_btn = Button(512, 160)
-
     while show:
+        coords = pygame.mouse.get_pos()
+        x, y = coords[0], coords[1]
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if (x > 489 and x < 990) and (y < 385 and y > 285):
+                screen.blit(pygame.transform.scale(load_image('fon_play.jpg'), (WIDTH, HEIGHT)), (0, 0))
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.mixer.Sound.play(menu_sound)
+                    return
+            elif (x > 489 and x < 990) and (y < 531 and y > 421):
+                screen.blit(pygame.transform.scale(load_image('fon_quit.jpg'), (WIDTH, HEIGHT)), (0, 0))
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.mixer.Sound.play(menu_sound)
+                    terminate()
+            elif event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
+            else:
+                screen.blit(pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT)), (0, 0))
 
-        screen.blit(menu_background, (0, 0))
-        # escape_btn.draw(300, 200, 'escape', None)
         pygame.display.flip()
         clock.tick(FPS)
+
+
+health_image = load_image('truba.png')
+beat_sound = load_music('beat.mp3', 'sound')
+loose = load_music('loose.mp3', 'sound')
+
+
+def game_over():
+    global health_counter
+    health_counter = 3
+    start_screen()
+
+
+def show_hp():
+    global health_counter
+    show = 0
+    x = 20
+    while show != health_counter:
+        screen.blit(health_image, (x, 20))
+        x += 30
+        show += 1
+
+
+def check_hp():
+    global health_counter
+    if health_counter - 1 == 0:
+        health_counter -= 1
+        loose.play()
+        game_over()
+    elif health_counter - 1 > 0:
+        health_counter -= 1
+        beat_sound.play()
 
 
 def load_level(name):
@@ -133,8 +175,8 @@ def generate_level(level):
                 new_player = Player(x, y)
             elif symbol == '$':
                 Tile('simple_road', x, y)
-                new_enemies.append(Enemy(x, y))
-            elif tile_name.startswith('roof') or tile_name == 'spawn':
+                new_enemies.append(Enemy(x, y, random.choice(enemy_skins)))
+            elif tile_name.startswith('roof') or tile_name == 'background':
                 Wall(tile_name, x, y)
             else:
                 Tile(tile_name, x, y)
@@ -174,7 +216,7 @@ map_symbols = {
     '¯': 'roof_3',
     ']': 'roof_4',
     'o': 'asphalt_luke',
-    '=': 'spawn',
+    '=': 'background',
     ' ': 'simple_road',
 }
 
@@ -207,10 +249,10 @@ tile_images = {
     'roof_2': load_image('roof_2.png'),
     'roof_3': load_image('roof_3.png'),
     'roof_4': load_image('roof_4.png'),
+    'background': load_image('background.png'),
     'asphalt_luke': load_image('asphalt_luke.png')
 }
 player_image = load_image('main.png')
-enemy_image = load_image('musor.png')
 
 
 class Tile(pygame.sprite.Sprite):
@@ -275,8 +317,9 @@ class Player(pygame.sprite.Sprite):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
+    def __init__(self, pos_x, pos_y, skin):
         super().__init__(enemies_group, all_sprites)
+        enemy_image = load_image(skin)
         self.image_left = enemy_image
         self.image_right = pygame.transform.flip(self.image_left, True, False)
         self.image = self.image_left
@@ -309,6 +352,7 @@ class Enemy(pygame.sprite.Sprite):
         if distance < 30:
             if self.state != "freezing":
                 self.state = "freezing"
+                check_hp()
                 freezing = Timer(self.freeze_time, self.stop_freezing)
                 freezing.start()
         elif distance < 100:
@@ -516,19 +560,16 @@ pygame.mixer.music.play(0)
 file_name = r"map.txt"
 
 player, enemies, level_x, level_y = generate_level(load_level(file_name))
-
 running = True
 while running:
     events = pygame.event.get()
     for event in events:
-
         if event.type == pygame.QUIT:
             running = False
             terminate()
         if event.type == SONG_END:
             load_music(random.choice(background_music), 'song')
             pygame.mixer.music.play(0)
-
     player.update()
     camera.update(player)
     for sprite in all_sprites:
@@ -536,10 +577,11 @@ while running:
     for enemy in enemies:
         enemy.update()
 
-    screen.fill(pygame.Color(0, 0, 255))
+    screen.fill(pygame.Color(0, 0, 0))
     all_sprites.draw(screen)
     player_group.draw(screen)
     enemies_group.draw(screen)
+    show_hp()
 
     pygame.display.flip()
     clock.tick(FPS)
